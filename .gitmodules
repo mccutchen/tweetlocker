@@ -4,3 +4,6 @@
 [submodule "ext/tweepy"]
 	path = ext/tweepy
 	url = git@github.com:mccutchen/tweepy.git
+[submodule "ext/tornado"]
+	path = ext/tornado
+	url = git@github.com:mccutchen/tornado.git
