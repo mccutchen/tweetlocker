@@ -1,3 +1,6 @@
 [submodule "ext/python-simplejson"]
 	path = ext/python-simplejson
 	url = git@github.com:mccutchen/python-simplejson.git
+[submodule "ext/tweepy"]
+	path = ext/tweepy
+	url = git@github.com:mccutchen/tweepy.git
