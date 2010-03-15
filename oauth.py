@@ -1,3 +1,5 @@
+import logging
+
 from google.appengine.ext import db
 import tornado.web
 import tweepy
@@ -33,8 +35,8 @@ class CallbackHandler(tornado.web.RequestHandler):
 
         verifier = self.get_argument('oauth_verifier')
         auth.set_request_token(token_key, token_secret)
-        auth.get_access_token(verifier)
+        access_token = auth.get_access_token(verifier)
 
         api = tweepy.API(auth)
         me = api.me()
-        self.write(u'%s' % me)
+        self.render('templates/index.html', user=me)
