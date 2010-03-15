@@ -1,12 +1,11 @@
+# Secrets -- These settings MUST be set in secrets.py, which should not be
+# kept in version control.  They should be kept, uh, secret.
 
-# Twitter API info
+# Twitter API consumer credentials.
 CONSUMER_KEY = None
 CONSUMER_SECRET = None
-REQUEST_TOKEN_URL = 'http://twitter.com/oauth/request_token'
-ACCESS_TOKEN_URL = 'http://twitter.com/oauth/access_token'
-AUTH_URL = 'http://twitter.com/oauth/authorize'
 
-# Secret key for signing cookies
+# Used to sign cookies.
 COOKIE_SECRET = None
 
 try:
