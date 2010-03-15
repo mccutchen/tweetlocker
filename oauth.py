@@ -11,7 +11,7 @@ class LoginHandler(tornado.web.RequestHandler):
         auth = tweepy.OAuthHandler(
             settings.CONSUMER_KEY, settings.CONSUMER_SECRET,
             'http://localhost:9999/oauth/callback')
-        redirect_url = auth.get_authorization_url()
+        redirect_url = auth.get_authorization_url(signin_with_twitter=True)
         self.set_secure_cookie(
             'request_token_key', auth.request_token.key)
         self.set_secure_cookie(
