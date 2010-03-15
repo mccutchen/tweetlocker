@@ -11,8 +11,10 @@ class LoginHandler(tornado.web.RequestHandler):
 
     def get(self):
         auth = tweepy.OAuthHandler(
-            settings.CONSUMER_KEY, settings.CONSUMER_SECRET,
-            'http://localhost:9999/oauth/callback')
+            settings.CONSUMER_KEY,
+            settings.CONSUMER_SECRET,
+            settings.OAUTH_CALLBACK)
+
         redirect_url = auth.get_authorization_url(signin_with_twitter=True)
         self.set_secure_cookie(
             'request_token_key', auth.request_token.key)
@@ -25,8 +27,9 @@ class CallbackHandler(tornado.web.RequestHandler):
 
     def get(self):
         auth = tweepy.OAuthHandler(
-            settings.CONSUMER_KEY, settings.CONSUMER_SECRET,
-            'http://localhost:9999/oauth/callback')
+            settings.CONSUMER_KEY,
+            settings.CONSUMER_SECRET,
+            settings.OAUTH_CALLBACK)
 
         token_key = self.get_secure_cookie('request_token_key')
         token_secret = self.get_secure_cookie('request_token_secret')

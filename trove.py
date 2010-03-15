@@ -11,8 +11,9 @@ class IndexHandler(tornado.web.RequestHandler):
 
     def get(self):
         auth = tweepy.OAuthHandler(
-            settings.CONSUMER_KEY, settings.CONSUMER_SECRET,
-            'http://localhost:9999/oauth/callback')
+            settings.CONSUMER_KEY,
+            settings.CONSUMER_SECRET,
+            settings.OAUTH_CALLBACK)
 
         key = self.get_secure_cookie('access_token_key')
         secret = self.get_secure_cookie('access_token_secret')
