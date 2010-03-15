@@ -10,6 +10,6 @@ AUTH_URL = 'http://twitter.com/oauth/authorize'
 COOKIE_SECRET = None
 
 try:
-	from secrets import *
+    from secrets import *
 except ImportError:
-	raise RuntimeError('Could not import secret settings')
+    raise RuntimeError('Could not import secret settings')

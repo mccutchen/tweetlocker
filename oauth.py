@@ -3,7 +3,7 @@ from google.appengine.ext import db
 
 
 class LoginHandler(tornado.web.RequestHandler):
-	pass
+    pass
 
 class CallbackHandler(tornado.web.RequestHandler):
-	pass
+    pass
