@@ -1,0 +1,96 @@
+{
+    "created_at":"Mon Mar 15 23:10:25 +0000 2010",
+    "favorited":false,
+    "contributors":null,
+    "place":
+    {
+        "place_type":"neighborhood",
+        "country":"",
+        "url":"http://api.twitter.com/1/geo/id/8dd66114d32aab41.json",
+        "full_name":"Jersey Village",
+        "name":"Jersey Village",
+        "id":"8dd66114d32aab41",
+        "country_code":"US",
+        "bounding_box":
+        {
+            "type":"Polygon",
+            "coordinates":
+            [
+                [
+                    [
+                        -95.576414,
+                        29.874914
+                    ],
+                    [
+                        -95.550065,
+                        29.874914
+                    ],
+                    [
+                        -95.550065,
+                        29.89579
+                    ],
+                    [
+                        -95.576414,
+                        29.89579
+                    ]
+                ]
+            ]
+        }
+    },
+    "coordinates":
+    {
+        "type":"Point",
+        "coordinates":
+        [
+            -95.561061,
+            29.89157
+        ]
+    },
+    "source":"<a href=\"http://twitterride.net/\" rel=\"nofollow\">TwitterRide</a>",
+    "truncated":false,
+    "geo":
+    {
+        "type":"Point",
+        "coordinates":
+        [
+            29.89157,
+            -95.561061
+        ]
+    },
+    "in_reply_to_screen_name":"Astrophizz",
+    "in_reply_to_user_id":14989610,
+    "in_reply_to_status_id":null,
+    "user":
+    {
+        "created_at":"Tue Dec 09 02:36:25 +0000 2008",
+        "profile_sidebar_fill_color":"828282",
+        "followers_count":142,
+        "description":"Hellaciously sexy and sexfully oily. \u00a9 2009 Will McCutchen",
+        "statuses_count":810,
+        "screen_name":"liz_wong",
+        "following":false,
+        "time_zone":"Central Time (US & Canada)",
+        "friends_count":60,
+        "profile_sidebar_border_color":"181a1e",
+        "contributors_enabled":false,
+        "url":null,
+        "favourites_count":1,
+        "profile_text_color":"000000",
+        "location":"",
+        "geo_enabled":true,
+        "profile_background_image_url":"http://a3.twimg.com/profile_background_images/65211729/newblog_nosub.jpg",
+        "notifications":false,
+        "profile_link_color":"2fc2ef",
+        "protected":false,
+        "verified":false,
+        "profile_background_tile":false,
+        "name":"Liz Wong",
+        "profile_background_color":"000000",
+        "id":17981465,
+        "lang":"en",
+        "utc_offset":-21600,
+        "profile_image_url":"http://a3.twimg.com/profile_images/359517187/nycme_normal.jpg"
+    },
+    "id":10539880834,
+    "text":"@astrophizz @mccutchen trying geotag out for myself"
+}

@@ -1,0 +1,81 @@
+{
+    "created_at":"Mon Mar 15 23:04:47 +0000 2010",
+    "in_reply_to_screen_name":null,
+    "place":
+    {
+        "country":"",
+        "url":"http://api.twitter.com/1/geo/id/4e8fb9c14d99dc8a.json",
+        "place_type":"neighborhood",
+        "full_name":"Central East Austin",
+        "name":"Central East Austin",
+        "id":"4e8fb9c14d99dc8a",
+        "country_code":"US",
+        "bounding_box":
+        {
+            "type":"Polygon",
+            "coordinates":
+            [
+                [
+                    [
+                        -97.73474904,
+                        30.26120904
+                    ],
+                    [
+                        -97.71328188,
+                        30.26120904
+                    ],
+                    [
+                        -97.71328188,
+                        30.279708
+                    ],
+                    [
+                        -97.73474904,
+                        30.279708
+                    ]
+                ]
+            ]
+        }
+    },
+    "coordinates":null,
+    "source":"web",
+    "geo":null,
+    "in_reply_to_status_id":null,
+    "contributors":null,
+    "in_reply_to_user_id":null,
+    "user":
+    {
+        "favourites_count":4,
+        "created_at":"Fri Jul 27 22:15:51 +0000 2007",
+        "profile_sidebar_fill_color":"dddddd",
+        "description":"",
+        "contributors_enabled":false,
+        "screen_name":"mccutchen",
+        "following":true,
+        "geo_enabled":true,
+        "time_zone":"Central Time (US & Canada)",
+        "profile_sidebar_border_color":"cccccc",
+        "url":null,
+        "verified":false,
+        "profile_text_color":"333",
+        "location":"Austin,
+         TX",
+        "profile_background_image_url":"http://a3.twimg.com/profile_background_images/37951529/lines-2.png",
+        "notifications":false,
+        "profile_link_color":"900",
+        "followers_count":27,
+        "protected":false,
+        "profile_background_tile":true,
+        "name":"Will McCutchen",
+        "friends_count":18,
+        "profile_background_color":"eeeeee",
+        "id":7772362,
+        "lang":"en",
+        "statuses_count":77,
+        "utc_offset":-21600,
+        "profile_image_url":"http://a3.twimg.com/profile_images/198102931/1241500162170_normal.jpg"
+    },
+    "favorited":false,
+    "truncated":false,
+    "id":10539648614,
+    "text":"Testing Twitter's geolocation.  I wish they'd expose this on their mobile site."
+}
