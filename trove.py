@@ -5,6 +5,7 @@ import tornado.web
 import tweepy
 
 import settings
+from models import User
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -21,8 +22,9 @@ class IndexHandler(tornado.web.RequestHandler):
         if key and secret:
             auth.set_access_token(key, secret)
             api = tweepy.API(auth)
-            user = api.me()
+            user = User.get_by_key_name(str(api.me().id))
         else:
             user = None
 
-        self.render('templates/index.html', user=user)
+        tweets = user.tweets.order('-created_at') if user else []
+        self.render('templates/index.html', user=user, tweets=tweets)
