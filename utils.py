@@ -21,27 +21,21 @@ def make_api(token_key=None, token_secret=None):
         auth = make_auth(token_key, token_secret)
     return tweepy.API(auth)
 
-def make_tweet(user, tweetobj, commit=True):
-    """Creates a Tweet entity for the given tweepy API tweet object.  If
-    commit is False, the new Tweet is never put to the datastore and any
-    post-processing tasks are NOT fired off."""
-    tweet = Tweet(parent=user, key_name=str(tweetobj.id))
+def make_tweet(user, tweetobj):
+    """Creates a Tweet entity for the given tweepy API tweet object.  The new
+    Tweet is never put to the datastore and any post-processing tasks are NOT
+    fired off."""
 
-    # Copy over fields that are a 1-to-1 match
+    # Copy fields that are a 1-to-1 match
     exclude = set(('coordinates', 'place'))
-    fields = set(Tweet.properties) - exclude
-    for field in fields:
-        setattr(tweet, field, getattr(tweetobj, field))
+    fields = set(Tweet.properties()) - exclude
+    props = dict((field, getattr(tweetobj, field, None)) for field in fields)
 
-    # Copy over the coordinates, if they're there available
+    # Create a Tweet entity with the properties copied from the tweepy object
+    tweet = Tweet(parent=user, key_name=str(tweetobj.id), **props)
+
+    # Copy over the coordinates, if they're available
     if tweetobj.coordinates:
         tweet.coordinates = db.GeoPt(*tweetobj.coordinates['coordinates'])
 
-    if commit:
-        tweet.put()
-        # Kick off post-processing tasks
-        from tasks import post_process_tweet
-        deferred.defer(post_process_tweet, tweet.id)
-
     return tweet
-
