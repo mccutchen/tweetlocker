@@ -1,21 +1,18 @@
 import logging
 
-from google.appengine.ext import db
+from google.appengine.ext import db, deferred
 import tornado.web
 import tweepy
 
-import settings
 from models import User
+from utils import make_auth
+import settings
 
 
 class LoginHandler(tornado.web.RequestHandler):
 
     def get(self):
-        auth = tweepy.OAuthHandler(
-            settings.CONSUMER_KEY,
-            settings.CONSUMER_SECRET,
-            settings.OAUTH_CALLBACK)
-
+        auth = make_auth()
         redirect_url = auth.get_authorization_url(signin_with_twitter=True)
         self.set_secure_cookie(
             'request_token_key', auth.request_token.key)
@@ -27,11 +24,7 @@ class LoginHandler(tornado.web.RequestHandler):
 class CallbackHandler(tornado.web.RequestHandler):
 
     def get(self):
-        auth = tweepy.OAuthHandler(
-            settings.CONSUMER_KEY,
-            settings.CONSUMER_SECRET,
-            settings.OAUTH_CALLBACK)
-
+        auth = make_auth()
         token_key = self.get_secure_cookie('request_token_key')
         token_secret = self.get_secure_cookie('request_token_secret')
         self.clear_cookie('request_token_key')
@@ -45,6 +38,9 @@ class CallbackHandler(tornado.web.RequestHandler):
         # use them for Twitter auth (if they're still valid)
         self.set_secure_cookie('access_token_key', access_token.key)
         self.set_secure_cookie('access_token_secret', access_token.secret)
+
+        logging.warn('Access tokens: %r, %r' %
+                     (access_token.key, access_token.secret))
 
         # Make sure we have an entity for the user that just logged in
         api = tweepy.API(auth)
