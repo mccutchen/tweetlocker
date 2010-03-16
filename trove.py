@@ -26,5 +26,5 @@ class IndexHandler(tornado.web.RequestHandler):
         else:
             user = None
 
-        tweets = user.tweets.order('-created_at') if user else []
+        tweets = user.tweets.order('-created_at').fetch(20) if user else []
         self.render('templates/index.html', user=user, tweets=tweets)

@@ -8,10 +8,11 @@
     {% if user %}
         <h2>Welcome {{ user.screen_name }} ({{ user.id }})</h2>
         {% if user.import_finished %}
-            <p>We've finished importing your tweets.  You've got {{ user.tweet_count }} of them.  Here they are:</p>
+            <p>We've finished importing your tweets.  You've got {{ user.tweet_count }} of them.</p>
         {% else %}
             <p>We have not yet finished importing your tweets.  Here's what we've got so far:</p>
         {% end %}
+        <h3>{{ len(tweets) }} Latest Tweets</h3>
         <ul>
             {% for tweet in tweets %}
                 <li>{{ tweet.text }} on {{ tweet.created_at }}</li>
