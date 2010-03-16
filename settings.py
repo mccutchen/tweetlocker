@@ -7,6 +7,9 @@ PRODUCTION = 'Development' not in os.environ.get('SERVER_SOFTWARE', '')
 # works in development or production.
 OAUTH_CALLBACK = 'http://%s/oauth/callback' % os.environ['HTTP_HOST']
 
+# How many tweets to fetch at once
+BATCH_SIZE = 50
+
 
 ##############################################################################
 # Secrets -- These settings MUST be set in secrets.py, which should not be

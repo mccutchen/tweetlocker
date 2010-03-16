@@ -51,5 +51,9 @@ class CallbackHandler(tornado.web.RequestHandler):
             user = User(key_name=str(user.id), id=user.id,
                         screen_name=user.screen_name)
             user.put()
+            # Start the initial import for this user
+            from tasks import initial_import
+            deferred.defer(initial_import, user.id, access_token.key,
+                           access_token.secret)
 
         return self.redirect('/')
