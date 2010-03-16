@@ -43,7 +43,7 @@ class Tweet(db.Model):
     """An individual tweet.  Should be created with a specific User instance
     as its parent."""
     id = db.IntegerProperty(required=True)
-    text = db.StringProperty(required=True)
+    text = db.StringProperty(required=True, multiline=True)
     created_at = db.DateTimeProperty(required=True)
 
     source = db.StringProperty()
