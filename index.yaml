@@ -10,3 +10,13 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Tweet
+  ancestor: yes
+  properties:
+  - name: created_at
+
+- kind: Tweet
+  ancestor: yes
+  properties:
+  - name: created_at
+    direction: desc
