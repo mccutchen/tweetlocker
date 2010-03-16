@@ -31,7 +31,8 @@ def fetch_new_tweets(user_id, token_key, token_secret, since_id=None):
 
 
 def initial_import(user_id, token_key, token_secret, max_id=None):
-    logging.info('Importing all tweets for user %d...' % user_id)
+    logging.info('Importing all tweets older than %s for user %d...' %
+                 (max_id, user_id))
     user = User.get_by_key_name(str(user_id))
     if not user:
         return logging.error('User not found.')
@@ -48,7 +49,7 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
         logging.info('Importing %d tweets in this batch' % len(tweets))
         entities, max_id = [], None
         for tweet in tweets:
-            entities.append(utils.make_tweet(tweet, commit=False))
+            entities.append(utils.make_tweet(user, tweet))
             max_id = tweet.id
         user.tweet_count += len(tweets)
         db.put(entities + [user])
@@ -56,9 +57,14 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
         # Spawn deferred tasks to process each tweet we just created
         # (necessary because of the commit=False param given to make_tweet)
         for tweet in tweets:
-            deferred.defer(post_process_tweet, tweet.id)
+            pass #deferred.defer(post_process_tweet, tweet.id)
 
-        # Spawn another instance of this task to continue the import process
+        # Spawn another instance of this task to continue the import
+        # process. The max_id needs to be decremented here because Twitter's
+        # API will include the tweet with that ID, even though you might
+        # expect it to only include tweets *older* than that one, like the
+        # documentation says.
+        max_id -= 1
         deferred.defer(
             initial_import, user_id, token_key, token_secret, max_id)
 

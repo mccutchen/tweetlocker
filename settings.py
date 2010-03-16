@@ -8,7 +8,7 @@ PRODUCTION = 'Development' not in os.environ.get('SERVER_SOFTWARE', '')
 OAUTH_CALLBACK = 'http://%s/oauth/callback' % os.environ['HTTP_HOST']
 
 # How many tweets to fetch at once
-BATCH_SIZE = 50
+BATCH_SIZE = 100
 
 
 ##############################################################################

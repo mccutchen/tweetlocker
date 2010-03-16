@@ -6,6 +6,7 @@ import tweepy
 
 from models import User
 from utils import make_auth
+from tasks import initial_import
 import settings
 
 
@@ -52,7 +53,6 @@ class CallbackHandler(tornado.web.RequestHandler):
                         screen_name=user.screen_name)
             user.put()
             # Start the initial import for this user
-            from tasks import initial_import
             deferred.defer(initial_import, user.id, access_token.key,
                            access_token.secret)
 
