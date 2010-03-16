@@ -1,10 +1,13 @@
 import logging
 
 from google.appengine.ext import db
+from google.appengine.api import memcache
+
 import tornado.web
 import tweepy
 
 import settings
+import utils
 from models import User
 
 
@@ -20,9 +23,12 @@ class IndexHandler(tornado.web.RequestHandler):
         secret = self.get_secure_cookie('access_token_secret')
 
         if key and secret:
-            auth.set_access_token(key, secret)
-            api = tweepy.API(auth)
-            user = User.get_by_key_name(str(api.me().id))
+            user_id = memcache.get(key+secret)
+            if user_id is None:
+                api = utils.make_api(key, secret)
+                user_id = api.me().id
+                memcache.set(key+secret, user_id)
+            user = User.get_by_key_name(str(user_id))
         else:
             user = None
 

@@ -1,6 +1,8 @@
 import logging
 
 from google.appengine.ext import db, deferred
+from google.appengine.api import memcache
+
 import tornado.web
 import tweepy
 
@@ -43,9 +45,15 @@ class CallbackHandler(tornado.web.RequestHandler):
         logging.warn('Access tokens: %r, %r' %
                      (access_token.key, access_token.secret))
 
-        # Make sure we have an entity for the user that just logged in
         api = tweepy.API(auth)
         user = api.me()
+
+        # Store the user ID in memcached
+        cache_key = access_token.key + access_token.secret
+        memcache.set(cache_key, user.id)
+
+        # If we don't have a User object for this Twitter account already,
+        # create one and start the import process.
         if User.get_by_key_name(str(user.id)) is None:
             logging.info('Creating new User object for %s (%d)' % (
                     user.screen_name, user.id))
