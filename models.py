@@ -57,3 +57,19 @@ class Tweet(db.Model):
     @property
     def user(self):
         return self.parent()
+
+
+class DateArchive(db.Model):
+    """A collection of tweets that fall in a particular month and year.  TODO:
+    Is this too inflexible?  Should we just store counts here so we can show
+    it on the front page, but query for tweets-by-date dynamically?"""
+    year = db.IntegerProperty(required=True)
+    month = db.IntegerProperty(required=True)
+
+
+class ReplyArchive(db.Model):
+    """A collection of a particular user's replies to a particular other
+    user. Should be created with a User as its parent."""
+    user_id = db.IntegerProperty(required=True)
+    screen_name = db.StringProperty(required=True)
+    tweets = db.ListProperty(db.Key)
