@@ -33,6 +33,9 @@ def fetch_new_tweets(user_id, token_key, token_secret, since_id=None):
 def initial_import(user_id, token_key, token_secret, max_id=None):
     logging.info('Importing all tweets older than %s for user %d...' %
                  (max_id, user_id))
+
+    # We should just quit if the user doesn't exist or if their initial import
+    # has already finished.
     user = User.get_by_key_name(str(user_id))
     if not user:
         return logging.error('User not found.')
@@ -79,4 +82,20 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
 
 def post_process_tweet(tweet_id):
     """A deferred task that should be called after a Tweet is created."""
-    pass
+	# TODO: place, @mention and date archive aggregation, search indexing
+    tweet = Tweet.get_by_key_name(str(tweet_id))
+    if tweet is None:
+        return logging.error('Could not post-process tweet %s' % tweet_id)
+
+    logging.info('Post-processing tweet %s...' % tweet_id)
+    user = db.get(tweet.parent())
+
+    # Add this tweet to the appropriate date archive, creating it if needed
+    created_at = tweet.created_at
+    key = '%d/%d' % (user.id, created_at.year, created_at.month)
+    datearchive = DateArchive.get_or_insert(
+        key, parent=user, year=created_at.year, month=created_at.month)
+    datearchive.tweets.append(tweet)
+
+
+

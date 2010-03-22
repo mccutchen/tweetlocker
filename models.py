@@ -1,5 +1,5 @@
 from google.appengine.ext import db
-
+from search import Searchable
 
 class User(db.Model):
     """A Twitter user, who has a collection of Tweets and (if they're using
@@ -39,7 +39,7 @@ class Place(db.Model):
         return self.parent()
 
 
-class Tweet(db.Model):
+class Tweet(Searchable, db.Model):
     """An individual tweet.  Should be created with a specific User instance
     as its parent."""
     id = db.IntegerProperty(required=True)
@@ -67,8 +67,8 @@ class DateArchive(db.Model):
     month = db.IntegerProperty(required=True)
 
 
-class ReplyArchive(db.Model):
-    """A collection of a particular user's replies to a particular other
+class MentionArchive(db.Model):
+    """A collection of a particular user's mentions of a particular other
     user. Should be created with a User as its parent."""
     user_id = db.IntegerProperty(required=True)
     screen_name = db.StringProperty(required=True)
