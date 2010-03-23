@@ -43,7 +43,7 @@ class Tweet(Searchable, db.Model):
     """An individual tweet.  Should be created with a specific User instance
     as its parent."""
     id = db.IntegerProperty(required=True)
-    text = db.StringProperty(required=True, multiline=True)
+    text = db.TextProperty(required=True)
     created_at = db.DateTimeProperty(required=True)
 
     source = db.StringProperty()
@@ -59,17 +59,25 @@ class Tweet(Searchable, db.Model):
         return self.parent()
 
 
-class DateArchive(db.Model):
-    """A collection of tweets that fall in a particular month and year.  TODO:
-    Is this too inflexible?  Should we just store counts here so we can show
-    it on the front page, but query for tweets-by-date dynamically?"""
-    year = db.IntegerProperty(required=True)
-    month = db.IntegerProperty(required=True)
-
-
 class MentionArchive(db.Model):
     """A collection of a particular user's mentions of a particular other
     user. Should be created with a User as its parent."""
     user_id = db.IntegerProperty(required=True)
     screen_name = db.StringProperty(required=True)
     tweets = db.ListProperty(db.Key)
+
+
+class YearArchive(db.Model):
+    year = db.IntegerProperty(required=True)
+    tweet_count = db.IntegerProperty(default=0)
+
+class MonthArchive(db.Model):
+    year = db.IntegerProperty(required=True)
+    month = db.IntegerProperty(required=True)
+    tweet_count = db.IntegerProperty(default=0)
+
+class DayArchive(db.Model):
+    year = db.IntegerProperty(required=True)
+    month = db.IntegerProperty(required=True)
+    day = db.IntegerProperty(required=True)
+    tweet_count = db.IntegerProperty(default=0)

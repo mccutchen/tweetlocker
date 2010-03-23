@@ -60,7 +60,7 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
         # Spawn deferred tasks to process each tweet we just created
         # (necessary because of the commit=False param given to make_tweet)
         for tweet in tweets:
-            pass #deferred.defer(post_process_tweet, tweet.id)
+            deferred.defer(post_process_tweet, tweet.id)
 
         # Spawn another instance of this task to continue the import
         # process. The max_id needs to be decremented here because Twitter's
@@ -90,12 +90,42 @@ def post_process_tweet(tweet_id):
     logging.info('Post-processing tweet %s...' % tweet_id)
     user = db.get(tweet.parent())
 
-    # Add this tweet to the appropriate date archive, creating it if needed
+    make_date_archives(tweet)
+
+def update_mention_archives(tweet):
+    mentions = re.findall(r'@(\w+)', tweet.text)
+    if mentions:
+        logging.info('Found mentions of %s in tweet %s' %
+                     (', '.join(mentions), tweet.id))
+
+def update_date_archives(tweet):
+    """Increments the tweet_count field on each of the date archive models
+    (creating them if necessary) for the given tweet."""
     created_at = tweet.created_at
-    key = '%d/%d' % (user.id, created_at.year, created_at.month)
-    datearchive = DateArchive.get_or_insert(
+
+    # Year
+    key = created_at.strftime('%Y')
+    archive = YearArchive.get_or_insert(
+        key, parent=user, year=created_at.year)
+    db.run_in_transcation(increment_counter, archive.key())
+
+    # Month
+    key = created_at.strftime('%Y/%m')
+    archive = MonthArchive.get_or_insert(
         key, parent=user, year=created_at.year, month=created_at.month)
-    datearchive.tweets.append(tweet)
+    db.run_in_transcation(increment_counter, archive.key())
+
+    # Day
+    key = created_at.strftime('%Y/%m/%d')
+    archive = DayArchive.get_or_insert(
+        key, parent=user, year=created_at.year, month=created_at.month,
+        day=created_at.day)
+    db.run_in_transcation(increment_counter, archive.key())
 
 
-
+def increment_counter(key, field='tweet_count', amount=1):
+    """A utility function, designed to be used in a transaction, that will
+    update a field on a object by an arbirtrary amount."""
+    obj = db.get(key)
+    setattr(obj, field, getattr(obj, field) + amount)
+    obj.put()
