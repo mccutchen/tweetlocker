@@ -3,7 +3,7 @@ import logging
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
-import tornado.web
+from tornado.web import RequestHandler
 import tweepy
 
 import settings
@@ -11,7 +11,7 @@ import utils
 from models import User
 
 
-class IndexHandler(tornado.web.RequestHandler):
+class IndexHandler(RequestHandler):
 
     def get(self):
         auth = tweepy.OAuthHandler(
@@ -34,3 +34,31 @@ class IndexHandler(tornado.web.RequestHandler):
 
         tweets = user.tweets.order('-created_at').fetch(20) if user else []
         self.render('templates/index.html', user=user, tweets=tweets)
+
+
+class SearchHandler(RequestHandler):
+    pass
+
+class DatesHandler(RequestHandler):
+    pass
+
+class DateHandler(RequestHandler):
+    pass
+
+class PlacesHandler(RequestHandler):
+    pass
+
+class PlaceHandler(RequestHandler):
+    pass
+
+class ClientsHandler(RequestHandler):
+    pass
+
+class ClientHandler(RequestHandler):
+    pass
+
+class MentionsHandler(RequestHandler):
+    pass
+
+class MentionHandler(RequestHandler):
+    pass
