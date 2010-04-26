@@ -8,7 +8,7 @@ import tweepy
 
 from models import User
 from utils import make_auth
-from tasks import initial_import
+from trove.tasks import initial_import
 import settings
 
 

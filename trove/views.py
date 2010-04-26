@@ -7,25 +7,21 @@ from tornado.web import RequestHandler
 import tweepy
 
 import settings
-import utils
+import oauth.utils
 from models import User
 
 
 class IndexHandler(RequestHandler):
 
     def get(self):
-        auth = tweepy.OAuthHandler(
-            settings.CONSUMER_KEY,
-            settings.CONSUMER_SECRET,
-            settings.OAUTH_CALLBACK)
-
+        auth = oauth.utils.make_auth()
         key = self.get_secure_cookie('access_token_key')
         secret = self.get_secure_cookie('access_token_secret')
 
         if key and secret:
             user_id = memcache.get(key+secret)
             if user_id is None:
-                api = utils.make_api(key, secret)
+                api = oauth.utils.make_api(key, secret)
                 user_id = api.me().id
                 memcache.set(key+secret, user_id)
             user = User.get_by_key_name(str(user_id))

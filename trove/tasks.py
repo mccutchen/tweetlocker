@@ -3,8 +3,10 @@ import logging
 from google.appengine.ext import db, deferred
 import tweepy
 
+from oauth.utils import make_api, make_auth
+from utils import make_tweet
+
 from models import User, Tweet, Place
-import utils
 import settings
 
 def fetch_new_tweets(user_id, token_key, token_secret, since_id=None):
@@ -19,7 +21,7 @@ def fetch_new_tweets(user_id, token_key, token_secret, since_id=None):
         since_id = last_tweet.id if last_tweet else None
         logging.info('Found last tweet by date: %d' % since_id)
 
-    api = utils.make_api(token_key, token_secret)
+    api = make_api(token_key, token_secret)
     tweets = api.user_timeline(since_id=since_id, count=settings.BATCH_SIZE)
     if tweets:
         entities = []
@@ -44,7 +46,7 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
         return logging.error('Import already finished for user.')
 
     # Get a batch of tweets to work on
-    api = utils.make_api(token_key, token_secret)
+    api = make_api(token_key, token_secret)
     tweets = api.user_timeline(max_id=max_id, count=settings.BATCH_SIZE)
 
     # Are there any tweets in the batch?
@@ -52,7 +54,7 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
         logging.info('Importing %d tweets in this batch' % len(tweets))
         entities, max_id = [], None
         for tweet in tweets:
-            entities.append(utils.make_tweet(user, tweet))
+            entities.append(make_tweet(user, tweet))
             max_id = tweet.id
         user.tweet_count += len(tweets)
         db.put(entities + [user])
