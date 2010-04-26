@@ -20,6 +20,27 @@ class User(db.Model):
     def places(self):
         return db.Query(Place).ancestor(self)
 
+    @property
+    def mentions(self):
+        return db.Query(MentionArchive).ancestor(self)
+
+    @property
+    def years(self):
+        return db.Query(YearArchive).ancestor(self).order('-year')
+
+    @property
+    def months(self):
+        return db.Query(MonthArchive).ancestor(self)\
+            .order('-year').order('-month')
+
+    @property
+    def days(self):
+        return db.Query(DayArchive).ancestor(self).order('-day')
+
+    @property
+    def weeks(self):
+        return db.Query(WeekArchive).ancestor(self).order('-week')
+
 
 class Place(db.Model):
     """A specific place from which a user has made at least one tweet.  Should

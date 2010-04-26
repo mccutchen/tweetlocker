@@ -10,6 +10,13 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: MonthArchive
+  ancestor: yes
+  properties:
+  - name: year
+  - name: month
+    direction: desc
+
 - kind: Tweet
   ancestor: yes
   properties:
@@ -19,4 +26,10 @@ indexes:
   ancestor: yes
   properties:
   - name: created_at
+    direction: desc
+
+- kind: YearArchive
+  ancestor: yes
+  properties:
+  - name: year
     direction: desc
