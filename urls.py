@@ -1,23 +1,23 @@
-from trove import IndexHandler
-from oauth import LoginHandler, CallbackHandler
+import trove.views
+import oauth.views
 
 urls = [
-    (r'^/$', IndexHandler),
+    (r'^/$', trove.views.IndexHandler),
 
-    (r'^/search/$', SearchHandler),
+    (r'^/search/$', trove.views.SearchHandler),
 
-    (r'^/dates/$', DatesHandler),
-    (r'^/dates/(\d+)/(\d+)/$', DateHandler),
+    (r'^/dates/$', trove.views.DatesHandler),
+    (r'^/dates/(\d+)/(\d+)/$', trove.views.DateHandler),
 
-    (r'^/places/$', PlacesHandler),
-    (r'^/places/(\d+)/$', PlaceHandler),
+    (r'^/places/$', trove.views.PlacesHandler),
+    (r'^/places/(\d+)/$', trove.views.PlaceHandler),
 
-    (r'^/clients/$', ClientsHandler),
-    (r'^/clients/(\d+)/$', ClientHandler),
+    (r'^/clients/$', trove.views.ClientsHandler),
+    (r'^/clients/(\d+)/$', trove.views.ClientHandler),
 
-    (r'^/mentions/$', MentionsHandler),
-    (r'^/mentions/(\d+)/$', MentionHandler),
+    (r'^/mentions/$', trove.views.MentionsHandler),
+    (r'^/mentions/(\d+)/$', trove.views.MentionHandler),
 
-    (r'^/oauth/login$', LoginHandler),
-    (r'^/oauth/callback$', CallbackHandler),
+    (r'^/oauth/login$', oauth.views.LoginHandler),
+    (r'^/oauth/callback$', oauth.views.CallbackHandler),
 ]
