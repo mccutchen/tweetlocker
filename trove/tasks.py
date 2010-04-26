@@ -5,7 +5,7 @@ from google.appengine.ext import db, deferred
 import tweepy
 
 from oauth.utils import make_api, make_auth
-from utils import make_tweet
+from utils import make_tweet, make_mention_archive, add_to_list
 
 from models import User, Tweet, Place
 from models import YearArchive, MonthArchive, DayArchive, WeekArchive
@@ -136,21 +136,3 @@ def update_date_archives(tweet, user):
     archive = WeekArchive.get_or_insert(
         key, parent=user, year=created_at.year, week=week)
     db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
-
-
-def increment_counter(key, field='tweet_count', amount=1):
-    """A utility function, designed to be used in a transaction, that will
-    update a field on a object by an arbirtrary amount."""
-    obj = db.get(key)
-    setattr(obj, field, getattr(obj, field) + amount)
-    obj.put()
-
-def add_to_list(key, field, value):
-    """Adds the given value to the given field on the entity with the given
-    key.  The field must be a ListProperty, and the value must be of the
-    correct type.  Expected to be used in a transaction."""
-    obj = db.get(key)
-    values = getattr(obj, field)
-    values.append(value)
-    setattr(obj, field, values)
-    obj.put()
