@@ -12,9 +12,10 @@ def make_tweet(user, tweetobj):
     props = dict((field, getattr(tweetobj, field, None)) for field in fields)
 
     # Create a Tweet entity with the properties copied from the tweepy object
-    tweet = Tweet(parent=user, key_name=str(tweetobj.id), **props)
+    key = db.Key.from_path('User', user.id, 'Tweet', tweetobj.id)
+    tweet = Tweet(key=key, **props)
 
-    # Copy over the coordinates, if they're available
+    # Copy over the coordinates, if they're available. TODO: Handle places
     if tweetobj.coordinates:
         tweet.coordinates = db.GeoPt(*tweetobj.coordinates['coordinates'])
 

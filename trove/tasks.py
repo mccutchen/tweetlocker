@@ -26,7 +26,7 @@ def fetch_new_tweets(user_id, token_key, token_secret, since_id=None):
     if tweets:
         entities = []
         for tweet in tweets:
-            entities.extend(make_tweet(tweet))
+            entities.append(make_tweet(tweet))
         db.put(entities)
         deferred.defer(fetch_new_tweets, user_id, token_key, token_secret,
                        tweets[-1].id)
@@ -38,7 +38,7 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
 
     # We should just quit if the user doesn't exist or if their initial import
     # has already finished.
-    user = User.get_by_key_name(str(user_id))
+    user = User.get_by_id(user_id)
     if not user:
         return logging.error('User not found.')
 
@@ -62,7 +62,7 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
         # Spawn deferred tasks to process each tweet we just created
         # (necessary because of the commit=False param given to make_tweet)
         for tweet in tweets:
-            deferred.defer(post_process_tweet, tweet.id)
+            deferred.defer(post_process_tweet, tweet.id, user.id)
 
         # Spawn another instance of this task to continue the import
         # process. The max_id needs to be decremented here because Twitter's
@@ -82,17 +82,17 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
         user.import_finished = True
         user.put()
 
-def post_process_tweet(tweet_id):
+def post_process_tweet(tweet_id, user_id):
     """A deferred task that should be called after a Tweet is created."""
 	# TODO: place, @mention and date archive aggregation, search indexing
-    tweet = Tweet.get_by_key_name(str(tweet_id))
+    key = db.Key.from_path('User', user_id, 'Tweet', tweet_id)
+    tweet = Tweet.get(key)
     if tweet is None:
         return logging.error('Could not post-process tweet %s' % tweet_id)
 
     logging.info('Post-processing tweet %s...' % tweet_id)
-    user = db.get(tweet.parent())
-
-    make_date_archives(tweet)
+    update_date_archives(tweet)
+    update_mention_archives(tweet)
 
 def update_mention_archives(tweet):
     mentions = re.findall(r'@(\w+)', tweet.text)
