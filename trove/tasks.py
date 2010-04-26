@@ -7,7 +7,10 @@ from oauth.utils import make_api, make_auth
 from utils import make_tweet
 
 from models import User, Tweet, Place
+from models import YearArchive, MonthArchive, DayArchive, WeekArchive
+
 import settings
+
 
 def fetch_new_tweets(user_id, token_key, token_secret, since_id=None):
     return
@@ -85,22 +88,24 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
 def post_process_tweet(tweet_id, user_id):
     """A deferred task that should be called after a Tweet is created."""
 	# TODO: place, @mention and date archive aggregation, search indexing
-    key = db.Key.from_path('User', user_id, 'Tweet', tweet_id)
-    tweet = Tweet.get(key)
-    if tweet is None:
-        return logging.error('Could not post-process tweet %s' % tweet_id)
+    user_key = db.Key.from_path('User', user_id)
+    tweet_key = db.Key.from_path('User', user_id, 'Tweet', tweet_id)
+    user, tweet = db.get([user_key, tweet_key])
+    if tweet is None or user is None:
+        return logging.error('Could not post-process tweet %s for user %s' %
+                             (tweet_id, user_id))
 
     logging.info('Post-processing tweet %s...' % tweet_id)
-    update_date_archives(tweet)
-    update_mention_archives(tweet)
+    update_date_archives(tweet, user)
+    update_mention_archives(tweet, user)
 
-def update_mention_archives(tweet):
+def update_mention_archives(tweet, user):
     mentions = re.findall(r'@(\w+)', tweet.text)
     if mentions:
         logging.info('Found mentions of %s in tweet %s' %
                      (', '.join(mentions), tweet.id))
 
-def update_date_archives(tweet):
+def update_date_archives(tweet, user):
     """Increments the tweet_count field on each of the date archive models
     (creating them if necessary) for the given tweet."""
     created_at = tweet.created_at
