@@ -106,24 +106,30 @@ def update_date_archives(tweet):
     created_at = tweet.created_at
 
     # Year
-    key = created_at.strftime('%Y')
+    key = created_at.strftime(YearArchive.KEY_NAME)
     archive = YearArchive.get_or_insert(
         key, parent=user, year=created_at.year)
     db.run_in_transcation(increment_counter, archive.key())
 
     # Month
-    key = created_at.strftime('%Y/%m')
+    key = created_at.strftime(MonthArchive.KEY_NAME)
     archive = MonthArchive.get_or_insert(
         key, parent=user, year=created_at.year, month=created_at.month)
     db.run_in_transcation(increment_counter, archive.key())
 
     # Day
-    key = created_at.strftime('%Y/%m/%d')
+    key = created_at.strftime(DayArchive.KEY_NAME)
     archive = DayArchive.get_or_insert(
         key, parent=user, year=created_at.year, month=created_at.month,
         day=created_at.day)
     db.run_in_transcation(increment_counter, archive.key())
 
+    # Week
+    key = created_at.strftime(WeekArchive.KEY_NAME)
+    week = int(created_at.strftime('%U'))
+    archive = WeekArchive.get_or_insert(
+        key, parent=user, year=created_at.year, week=week)
+    db.run_in_transaction(increment_counter, archive.key())
 
 def increment_counter(key, field='tweet_count', amount=1):
     """A utility function, designed to be used in a transaction, that will

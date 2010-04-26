@@ -1,6 +1,7 @@
 from google.appengine.ext import db
 from search import Searchable
 
+
 class User(db.Model):
     """A Twitter user, who has a collection of Tweets and (if they're using
     Twitter's geolocation services) a collection of Places."""
@@ -68,16 +69,24 @@ class MentionArchive(db.Model):
 
 
 class YearArchive(db.Model):
+    KEY_NAME = '%Y'
     year = db.IntegerProperty(required=True)
     tweet_count = db.IntegerProperty(default=0)
 
 class MonthArchive(db.Model):
+    KEY_NAME = '%Y/%m'
     year = db.IntegerProperty(required=True)
     month = db.IntegerProperty(required=True)
     tweet_count = db.IntegerProperty(default=0)
 
 class DayArchive(db.Model):
+    KEY_NAME = '%Y/%m/%d'
     year = db.IntegerProperty(required=True)
     month = db.IntegerProperty(required=True)
     day = db.IntegerProperty(required=True)
     tweet_count = db.IntegerProperty(default=0)
+
+class WeekArchive(db.Model):
+    KEY_NAME = '%Y:%U' # Year:Week
+    year = db.IntegerProperty(required=True)
+    week = db.IntegerProperty(required=True)
