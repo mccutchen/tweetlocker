@@ -1,4 +1,5 @@
 import logging
+import re
 
 from google.appengine.ext import db, deferred
 import tweepy
@@ -114,31 +115,42 @@ def update_date_archives(tweet, user):
     key = created_at.strftime(YearArchive.KEY_NAME)
     archive = YearArchive.get_or_insert(
         key, parent=user, year=created_at.year)
-    db.run_in_transcation(increment_counter, archive.key())
+    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
 
     # Month
     key = created_at.strftime(MonthArchive.KEY_NAME)
     archive = MonthArchive.get_or_insert(
         key, parent=user, year=created_at.year, month=created_at.month)
-    db.run_in_transcation(increment_counter, archive.key())
+    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
 
     # Day
     key = created_at.strftime(DayArchive.KEY_NAME)
     archive = DayArchive.get_or_insert(
         key, parent=user, year=created_at.year, month=created_at.month,
         day=created_at.day)
-    db.run_in_transcation(increment_counter, archive.key())
+    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
 
     # Week
     key = created_at.strftime(WeekArchive.KEY_NAME)
     week = int(created_at.strftime('%U'))
     archive = WeekArchive.get_or_insert(
         key, parent=user, year=created_at.year, week=week)
-    db.run_in_transaction(increment_counter, archive.key())
+    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
+
 
 def increment_counter(key, field='tweet_count', amount=1):
     """A utility function, designed to be used in a transaction, that will
     update a field on a object by an arbirtrary amount."""
     obj = db.get(key)
     setattr(obj, field, getattr(obj, field) + amount)
+    obj.put()
+
+def add_to_list(key, field, value):
+    """Adds the given value to the given field on the entity with the given
+    key.  The field must be a ListProperty, and the value must be of the
+    correct type.  Expected to be used in a transaction."""
+    obj = db.get(key)
+    values = getattr(obj, field)
+    values.append(value)
+    setattr(obj, field, values)
     obj.put()

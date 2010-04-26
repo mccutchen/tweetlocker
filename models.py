@@ -68,25 +68,31 @@ class MentionArchive(db.Model):
     tweets = db.ListProperty(db.Key)
 
 
-class YearArchive(db.Model):
+class DateArchive(db.Model):
+    # A strftime() format string used to create the key name for an instance
+    # based on an arbitrary datetime object.
+    KEY_NAME = None
+
+    # The keys of the tweets that are in this archive
+    tweets = db.ListProperty(db.Key)
+
+class YearArchive(DateArchive):
     KEY_NAME = '%Y'
     year = db.IntegerProperty(required=True)
-    tweet_count = db.IntegerProperty(default=0)
 
-class MonthArchive(db.Model):
+class MonthArchive(DateArchive):
     KEY_NAME = '%Y/%m'
     year = db.IntegerProperty(required=True)
     month = db.IntegerProperty(required=True)
-    tweet_count = db.IntegerProperty(default=0)
 
-class DayArchive(db.Model):
+class DayArchive(DateArchive):
     KEY_NAME = '%Y/%m/%d'
     year = db.IntegerProperty(required=True)
     month = db.IntegerProperty(required=True)
     day = db.IntegerProperty(required=True)
-    tweet_count = db.IntegerProperty(default=0)
 
-class WeekArchive(db.Model):
+class WeekArchive(DateArchive):
     KEY_NAME = '%Y:%U' # Year:Week
     year = db.IntegerProperty(required=True)
     week = db.IntegerProperty(required=True)
+
