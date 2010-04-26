@@ -18,6 +18,19 @@
                 <li>{{ tweet.text }} on {{ tweet.created_at }}</li>
             {% end %}
         </ul>
+
+        <h3>Archives by Date</h3>
+        <ul>
+            {% for year in user.years %}
+                <li>
+                    <h4>{{ year.year }} &mdash; {{ len(year.tweets) }}</h4>
+                    <ul>
+                        {% for month in user.months.filter('year =', year.year) %}
+                            <li>{{ month.month }} &mdash; {{ len(month.tweets) }}</li>
+                        {% end %}
+                    </ul>
+                </li>
+            {% end %}
     {% else %}
         <a href="/oauth/login"><img src="/static/img/signin.png" alt="Sign in with Twitter">
     {% end %}
