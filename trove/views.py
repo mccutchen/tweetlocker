@@ -22,9 +22,9 @@ class IndexHandler(RequestHandler):
             user_id = memcache.get(key+secret)
             if user_id is None:
                 api = oauth.utils.make_api(key, secret)
-                user_id = api.me().id
+                user_id = str(api.me().id)
                 memcache.set(key+secret, user_id)
-            user = User.get_by_id(user_id)
+            user = User.get_by_key_name(str(user_id))
         else:
             user = None
 

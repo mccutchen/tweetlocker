@@ -63,7 +63,7 @@ class CallbackHandler(tornado.web.RequestHandler):
 
         # If we don't have a User object for this Twitter account already,
         # create one and start the import process.
-        key = db.Key.from_path('User', int(user.id))
+        key = db.Key.from_path('User', str(user.id))
         if User.get(key) is None:
             logging.info('Creating new User object for %s (%d)' % (
                     user.screen_name, user.id))

@@ -12,7 +12,7 @@ def make_tweet(user, tweetobj):
     props = dict((field, getattr(tweetobj, field, None)) for field in fields)
 
     # Create a Tweet entity with the properties copied from the tweepy object
-    key = db.Key.from_path('User', int(user.id), 'Tweet', int(tweetobj.id))
+    key = db.Key.from_path('User', str(user.id), 'Tweet', str(tweetobj.id))
     tweet = Tweet(key=key, **props)
 
     # Copy over the coordinates, if they're available. TODO: Handle places
@@ -24,8 +24,8 @@ def make_tweet(user, tweetobj):
 def make_mention_archive(user, mentioned_user, tweet):
     """Adds the given tweet to the given user's archive of mentions of the
     given mentioned_user, creating the archive if necessary."""
-    key = db.Key.from_path('User', user.id,
-                           'MentionArchive', mentioned_user.id)
+    key = db.Key.from_path('User', str(user.id),
+                           'MentionArchive', str(mentioned_user.id))
     def txn():
         archive = MentionArchive.get(key)
         if not archive:
