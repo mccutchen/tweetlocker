@@ -1,7 +1,9 @@
 import os, sys
 
 # Add our external dependencies to the $PYTHONPATH
-for lib in ('tornado', 'tweepy', 'python-simplejson', 'appengine-search'):
+extlibs = ('tornado', 'jinja2', 'tweepy', 'python-simplejson',
+           'appengine-search')
+for lib in extlibs:
     sys.path.insert(0, os.path.join('ext', lib))
 
 import tornado.wsgi

@@ -10,3 +10,6 @@
 [submodule "ext/appengine-search"]
 	path = ext/appengine-search
 	url = git@github.com:mccutchen/appengine-search.git
+[submodule "ext/jinja2"]
+	path = ext/jinja2
+	url = git@github.com:mccutchen/jinja2.git
