@@ -89,8 +89,8 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
 def post_process_tweet(tweet_id, user_id):
     """A deferred task that should be called after a Tweet is created."""
 	# TODO: place, @mention and date archive aggregation, search indexing
-    user_key = db.Key.from_path('User', user_id)
-    tweet_key = db.Key.from_path('User', user_id, 'Tweet', tweet_id)
+    user_key = db.Key.from_path('User', int(user_id))
+    tweet_key = db.Key.from_path('User', int(user_id), 'Tweet', int(tweet_id))
     user, tweet = db.get([user_key, tweet_key])
     if tweet is None or user is None:
         return logging.error('Could not post-process tweet %s for user %s' %
