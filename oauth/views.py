@@ -16,7 +16,12 @@ class LoginHandler(tornado.web.RequestHandler):
 
     def get(self):
         auth = make_auth()
-        redirect_url = auth.get_authorization_url(signin_with_twitter=True)
+        try:
+            redirect_url = auth.get_authorization_url(
+                signin_with_twitter=True)
+        except tweepy.TweepError, e:
+            return self.render('error.html', error=e)
+
         self.set_secure_cookie(
             'request_token_key', auth.request_token.key)
         self.set_secure_cookie(
@@ -35,7 +40,11 @@ class CallbackHandler(tornado.web.RequestHandler):
 
         verifier = self.get_argument('oauth_verifier')
         auth.set_request_token(token_key, token_secret)
-        access_token = auth.get_access_token(verifier)
+
+        try:
+            access_token = auth.get_access_token(verifier)
+        except tweepy.TweepError, e:
+            return self.render('error.html', error=e)
 
         # Store the access token key and secret in secure cookies, so we can
         # use them for Twitter auth (if they're still valid)
