@@ -1,3 +1,6 @@
+import logging
+import calendar
+
 from google.appengine.ext import db
 from search import Searchable
 
@@ -97,14 +100,23 @@ class DateArchive(db.Model):
     # The keys of the tweets that are in this archive
     tweets = db.ListProperty(db.Key)
 
+    def __str__(self):
+        return unicode(self).encode('utf-8', 'ignore')
+
 class YearArchive(DateArchive):
     KEY_NAME = '%Y'
     year = db.IntegerProperty(required=True)
+
+    def __unicode__(self):
+        return unicode(self.year)
 
 class MonthArchive(DateArchive):
     KEY_NAME = '%Y/%m'
     year = db.IntegerProperty(required=True)
     month = db.IntegerProperty(required=True)
+
+    def __unicode__(self):
+        return unicode(calendar.month_name[self.month])
 
 class DayArchive(DateArchive):
     KEY_NAME = '%Y/%m/%d'
@@ -112,8 +124,13 @@ class DayArchive(DateArchive):
     month = db.IntegerProperty(required=True)
     day = db.IntegerProperty(required=True)
 
+    def __unicode__(self):
+        return unicode(self.day)
+
 class WeekArchive(DateArchive):
     KEY_NAME = '%Y:%U' # Year:Week
     year = db.IntegerProperty(required=True)
     week = db.IntegerProperty(required=True)
 
+    def __unicode__(self):
+        return unicode(self.week)

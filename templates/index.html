@@ -2,7 +2,7 @@
 
 {% block title %}
     Home Page
-{% end %}
+{% endblock %}
 
 {% block content %}
     {% if user %}
@@ -11,27 +11,29 @@
             <p>We've finished importing your tweets.  You've got {{ user.tweet_count }} of them.</p>
         {% else %}
             <p>We have not yet finished importing your tweets.  Here's what we've got so far:</p>
-        {% end %}
-        <h3>{{ len(tweets) }} Latest Tweets</h3>
+        {% endif %}
+        <h3>{{ tweets|length }} Latest Tweets</h3>
         <ul>
             {% for tweet in tweets %}
                 <li>{{ tweet.text }} on {{ tweet.created_at }}</li>
-            {% end %}
+            {% endfor %}
         </ul>
 
         <h3>Archives by Date</h3>
-        <ul>
-            {% for year in user.years %}
-                <li>
-                    <h4>{{ year.year }} &mdash; {{ len(year.tweets) }}</h4>
-                    <ul>
-                        {% for month in user.months.filter('year =', year.year) %}
-                            <li>{{ month.month }} &mdash; {{ len(month.tweets) }}</li>
-                        {% end %}
-                    </ul>
-                </li>
-            {% end %}
+        <table>
+            {% for year, months in date_archives %}
+                {% for month in months %}
+                    <tr>
+                        {% if months.index(month) == 0 %}
+                            <td rowspan="{{ months|length }}">{{ year }}</td>
+                        {% endif %}
+                        <td>{{ month }}</td>
+                        <td>{{ month.tweets|length }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </table>
     {% else %}
         <a href="/oauth/login"><img src="/static/img/signin.png" alt="Sign in with Twitter">
-    {% end %}
-{% end %}
+    {% endif %}
+{% endblock %}

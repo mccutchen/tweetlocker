@@ -1,10 +1,12 @@
 import logging
+from itertools import groupby
+from operator import attrgetter
 
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
-from tornado.web import RequestHandler
 import tweepy
+from lib.handlers import RequestHandler
 
 import settings
 import oauth.utils
@@ -29,7 +31,15 @@ class IndexHandler(RequestHandler):
             user = None
 
         tweets = user.tweets.order('-created_at').fetch(20) if user else []
-        self.render('index.html', user=user, tweets=tweets)
+        months = user.months.fetch(user.tweet_count)
+        date_archives = [(k, list(g)) for k, g in
+                         groupby(months, attrgetter('year'))]
+        context = {
+            'user': user,
+            'tweets': tweets,
+            'date_archives': date_archives,
+            }
+        self.render('index.html', context)
 
 
 class SearchHandler(RequestHandler):

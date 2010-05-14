@@ -13,6 +13,8 @@ OAUTH_CALLBACK = 'http://%s/oauth/callback' % \
 # How many tweets to fetch at once
 BATCH_SIZE = 100
 
+TEMPLATE_DIR = os.path.join(PROJECT_ROOT, 'templates')
+
 
 ##############################################################################
 # Secrets -- These settings MUST be set in secrets.py, which should not be
@@ -37,6 +39,5 @@ except ImportError:
 # Tornado application config
 ##############################################################################
 APP_CONFIG = {
-    'template_path': os.path.join(PROJECT_ROOT, 'templates'),
     'cookie_secret': COOKIE_SECRET, # Enables secure cookies
 }
