@@ -31,3 +31,12 @@ try:
     from secrets import *
 except ImportError:
     raise RuntimeError('Could not import secret settings')
+
+
+##############################################################################
+# Tornado application config
+##############################################################################
+APP_CONFIG = {
+    'template_path': os.path.join(PROJECT_ROOT, 'templates'),
+    'cookie_secret': COOKIE_SECRET, # Enables secure cookies
+}

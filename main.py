@@ -11,10 +11,7 @@ import settings
 from urls import urls
 
 def main():
-    app_settings = {
-        'cookie_secret': settings.COOKIE_SECRET,
-    }
-    application = tornado.wsgi.WSGIApplication(urls, **app_settings)
+    application = tornado.wsgi.WSGIApplication(urls, **settings.APP_CONFIG)
     wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
