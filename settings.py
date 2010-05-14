@@ -1,11 +1,14 @@
 import os, sys
 
+PROJECT_ROOT = os.path.realpath(os.path.dirname(__file__))
+
 # See if we're running in production or in development
 PRODUCTION = 'Development' not in os.environ.get('SERVER_SOFTWARE', '')
 
 # Set the OAuth callback URL dynamically, based on the current host name. This
 # works in development or production.
-OAUTH_CALLBACK = 'http://%s/oauth/callback' % os.environ['HTTP_HOST']
+OAUTH_CALLBACK = 'http://%s/oauth/callback' % \
+    os.environ.get('HTTP_HOST', 'localhost')
 
 # How many tweets to fetch at once
 BATCH_SIZE = 100
