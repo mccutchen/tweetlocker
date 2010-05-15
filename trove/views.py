@@ -35,6 +35,12 @@ class IndexHandler(RequestHandler):
             memcache.set(key+secret, user_id)
         user = User.get_by_key_name(str(user_id))
 
+        # If we still don't have a user to work with, something went wrong.
+        # I'm not sure what, though.
+        if not user:
+            logging.warn('No user %s in the datastore' % user_id)
+            return self.render('welcome.html')
+
         # Gather up the info we need for the front page.
         tweets = user.tweets.order('-created_at').fetch(20)
 
@@ -45,11 +51,14 @@ class IndexHandler(RequestHandler):
         mention_archives = user.mentions.fetch(user.tweet_count)
         mention_archives.sort(key=lambda x: len(x.tweets), reverse=True)
 
+        places = user.places.fetch(user.tweet_count)
+
         context = {
             'user': user,
             'tweets': tweets,
             'date_archives': date_archives,
             'mention_archives': mention_archives,
+            'places': places,
             }
         self.render('index.html', context)
 

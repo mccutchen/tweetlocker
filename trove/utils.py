@@ -1,3 +1,4 @@
+import logging
 from google.appengine.ext import db, deferred
 from models import User, Tweet, Place, MentionArchive
 
@@ -15,11 +16,43 @@ def make_tweet(user, tweetobj):
     key = db.Key.from_path('User', str(user.id), 'Tweet', str(tweetobj.id))
     tweet = Tweet(key=key, **props)
 
-    # Copy over the coordinates, if they're available. TODO: Handle places
     if tweetobj.coordinates:
         tweet.coordinates = db.GeoPt(*tweetobj.coordinates['coordinates'])
+        tweet.has_coordinates = True
+
+    if tweetobj.place:
+        tweet.place = make_place(user, tweetobj.place)
+        tweet.has_coordinates = True
 
     return tweet
+
+def make_place(user, placedata):
+    """Makes a Place object for the given user's account with the given place
+    data.  The data given will have coordinates for its bounding box, which
+    will be averaged into a single coordinate for the place."""
+    key = db.Key.from_path('User', str(user.id),
+                           'Place', str(placedata['id']))
+    def txn(placedata=placedata):
+        place = Place.get(key)
+        if not place:
+            # Average the bounding box to get a single coordinate point for
+            # the place
+            bbox = placedata.pop('bounding_box')
+            coords = bbox['coordinates'][0]
+            num = float(len(coords))
+            lat = sum(lat for lon, lat in coords) / num
+            lon = sum(lon for lon, lat in coords) / num
+
+            # Make sure placedata keys are not unicode
+            placedata = dict((str(k), v) for k,v in placedata.iteritems())
+
+            # Create the place with the calculated coordinates
+            placedata['coordinates'] = db.GeoPt(lat, lon)
+            place = Place(key=key, **placedata)
+            place.put()
+        return place
+
+    return db.run_in_transaction(txn)
 
 def make_mention_archive(user, mentioned_user, tweet):
     """Adds the given tweet to the given user's archive of mentions of the

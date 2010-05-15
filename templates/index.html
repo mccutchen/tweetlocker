@@ -33,12 +33,22 @@
         {% endfor %}
     </table>
 
-    <h3>Your mentions</h3>
+    <h3>Mentions</h3>
     <table>
         {% for mention in mention_archives %}
             <tr>
                 <td>{{ mention }}</td>
                 <td>{{ mention.tweets|length }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    
+    <h3>Places</h3>
+    <table>
+        {% for place in places %}
+            <tr>
+                <td>{{ place }}</td>
+                <td>{{ place.tweet_count }}</td>
             </tr>
         {% endfor %}
     </table>

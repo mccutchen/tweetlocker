@@ -100,6 +100,10 @@ def post_process_tweet(tweet_id, user_id):
     update_date_archives(tweet, user)
     update_mention_archives(tweet, user)
 
+    if tweet.place:
+        tweet.place.tweet_count = tweet.place.tweets.count()
+        tweet.place.put()
+
 def update_mention_archives(tweet, user):
     mentions = re.findall(r'@(\w+)', tweet.text)
     for mention in mentions:
