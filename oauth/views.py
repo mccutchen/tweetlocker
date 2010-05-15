@@ -3,8 +3,8 @@ import logging
 from google.appengine.ext import db, deferred
 from google.appengine.api import memcache
 
-import tornado.web
 import tweepy
+from lib.handlers import RequestHandler
 
 from models import User
 from utils import make_auth
@@ -12,7 +12,7 @@ from trove.tasks import initial_import
 import settings
 
 
-class LoginHandler(tornado.web.RequestHandler):
+class LoginHandler(RequestHandler):
 
     def get(self):
         auth = make_auth()
@@ -20,7 +20,7 @@ class LoginHandler(tornado.web.RequestHandler):
             redirect_url = auth.get_authorization_url(
                 signin_with_twitter=True)
         except tweepy.TweepError, e:
-            return self.render('error.html', error=e)
+            return self.render('error.html', { 'error': e })
 
         self.set_secure_cookie(
             'request_token_key', auth.request_token.key)
@@ -29,7 +29,7 @@ class LoginHandler(tornado.web.RequestHandler):
         return self.redirect(redirect_url)
 
 
-class CallbackHandler(tornado.web.RequestHandler):
+class CallbackHandler(RequestHandler):
 
     def get(self):
         auth = make_auth()
@@ -44,7 +44,7 @@ class CallbackHandler(tornado.web.RequestHandler):
         try:
             access_token = auth.get_access_token(verifier)
         except tweepy.TweepError, e:
-            return self.render('error.html', error=e)
+            return self.render('error.html', { 'error': e })
 
         # Store the access token key and secret in secure cookies, so we can
         # use them for Twitter auth (if they're still valid)
