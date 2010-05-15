@@ -22,7 +22,7 @@ class IndexHandler(RequestHandler):
 
         # If we don't have a user to work with, bail early.
         if not key or not secret:
-            return self.render('index.html')
+            return self.render('welcome.html')
 
         # Authenticated users will have their Twitter API access token info
         # stored in secure cookies.  The token info is used to store the
