@@ -84,11 +84,13 @@ def make_mention_archive(user, mentioned_user, tweet):
     """Adds the given tweet to the given user's archive of mentions of the
     given mentioned_user, creating the archive if necessary."""
     key = db.Key.from_path('User', str(user.id),
-                           'MentionArchive', str(mentioned_user))
+                           'MentionArchive', str(mentioned_user.id))
     def txn():
         archive = MentionArchive.get(key)
         if not archive:
-            archive = MentionArchive(key=key, screen_name=mentioned_user)
+            archive = MentionArchive(
+                key=key, id=mentioned_user.id,
+                screen_name=mentioned_user.screen_name)
             archive.put()
         return archive
 

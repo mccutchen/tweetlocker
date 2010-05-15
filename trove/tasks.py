@@ -109,8 +109,13 @@ def post_process_tweet(tweet_id, user_id):
 
 def update_mention_archives(tweet, user):
     mentions = re.findall(r'@(\w+)', tweet.text)
-    for mention in mentions:
-        make_mention_archive(user, mention, tweet)
+    try:
+        mentions = user.api.lookup_users(screen_names=mentions)
+    except tweepy.TweepError, e:
+        logging.error('Could not look up users: %s' % ','.join(mentions))
+    else:
+        for mention in mentions:
+            make_mention_archive(user, mention, tweet)
 
 def update_date_archives(tweet, user):
     """Increments the tweet_count field on each of the date archive models
