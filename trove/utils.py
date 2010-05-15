@@ -17,7 +17,9 @@ def make_tweet(user, tweetobj):
     tweet = Tweet(key=key, **props)
 
     if tweetobj.coordinates:
-        tweet.coordinates = db.GeoPt(*tweetobj.coordinates['coordinates'])
+        # Twitter's coordinates are backwards
+        coords = reversed(tweetobj.coordinates['coordinates'])
+        tweet.coordinates = db.GeoPt(*coords)
         tweet.has_coordinates = True
 
     if tweetobj.place:
