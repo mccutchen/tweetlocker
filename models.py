@@ -4,12 +4,19 @@ import calendar
 from google.appengine.ext import db
 from search import Searchable
 
+from oauth.utils import make_api
+
 
 class User(db.Model):
     """A Twitter user, who has a collection of Tweets and (if they're using
     Twitter's geolocation services) a collection of Places."""
     id = db.IntegerProperty(required=True)
     screen_name = db.StringProperty(required=True)
+
+    # It doesn't feel right to store these, but we have to in order to fetch
+    # each user's new tweets automatically.
+    api_key = db.StringProperty(required=True)
+    api_secret = db.StringProperty(required=True)
 
     tweet_count = db.IntegerProperty(default=0)
     latest_tweet_id = db.IntegerProperty()
@@ -47,6 +54,14 @@ class User(db.Model):
     @property
     def weeks(self):
         return db.Query(WeekArchive).ancestor(self).order('-week')
+
+    @property
+    def api(self):
+        """Makes an authenticated tweepy.API object for this user."""
+        if hasattr(self, '_api'):
+            return self._api
+        self._api = make_api(self.api_key, self.api_secret)
+        return self._api
 
 
 class Place(db.Model):

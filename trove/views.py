@@ -16,29 +16,13 @@ from models import User
 class IndexHandler(RequestHandler):
 
     def get(self):
-        auth = oauth.utils.make_auth()
-        key = self.get_secure_cookie('access_token_key')
-        secret = self.get_secure_cookie('access_token_secret')
-
-        # If we don't have a user to work with, bail early.
-        if not key or not secret:
-            return self.render('welcome.html')
-
-        # Authenticated users will have their Twitter API access token info
-        # stored in secure cookies.  The token info is used to store the
-        # user's ID in memcache.  That ID can then be used to get the User
-        # object from the datastore.
-        user_id = memcache.get(key+secret)
-        if user_id is None:
-            api = oauth.utils.make_api(key, secret)
-            user_id = str(api.me().id)
-            memcache.set(key+secret, user_id)
+        user_id = self.get_secure_cookie('user_id')
         user = User.get_by_key_name(str(user_id))
 
-        # If we still don't have a user to work with, something went wrong.
-        # I'm not sure what, though.
+        # If we don't have a user to work with, bail early.
         if not user:
-            logging.warn('No user %s in the datastore' % user_id)
+            if user_id:
+                logging.warn('User %s missing from datastore' % user_id)
             return self.render('welcome.html')
 
         # Gather up the info we need for the front page.

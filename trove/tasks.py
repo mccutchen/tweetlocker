@@ -36,7 +36,7 @@ def fetch_new_tweets(user_id, token_key, token_secret, since_id=None):
                        tweets[-1].id)
 
 
-def initial_import(user_id, token_key, token_secret, max_id=None):
+def initial_import(user_id, max_id=None):
     logging.info('Importing all tweets older than %s for user %d...' %
                  (max_id, user_id))
 
@@ -50,8 +50,7 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
         return logging.error('Import already finished for user.')
 
     # Get a batch of tweets to work on
-    api = make_api(token_key, token_secret)
-    tweets = api.user_timeline(max_id=max_id, count=settings.BATCH_SIZE)
+    tweets = user.api.user_timeline(max_id=max_id, count=settings.BATCH_SIZE)
 
     # Are there any tweets in the batch?
     if tweets:
@@ -75,7 +74,7 @@ def initial_import(user_id, token_key, token_secret, max_id=None):
         # documentation says.
         max_id -= 1
         deferred.defer(
-            initial_import, user_id, token_key, token_secret, max_id)
+            initial_import, user_id, max_id)
 
     # Otherwise, the import has finished.  Update the user accordingly.
     else:
@@ -96,7 +95,7 @@ def post_process_tweet(tweet_id, user_id):
         return logging.error('Could not post-process tweet %s for user %s' %
                              (tweet_id, user_id))
 
-    logging.info('Post-processing tweet %s...' % tweet_id)
+    #logging.info('Post-processing tweet %s...' % tweet_id)
     update_date_archives(tweet, user)
     update_mention_archives(tweet, user)
 

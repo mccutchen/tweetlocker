@@ -46,20 +46,11 @@ class CallbackHandler(RequestHandler):
         except tweepy.TweepError, e:
             return self.render('error.html', { 'error': e })
 
-        # Store the access token key and secret in secure cookies, so we can
-        # use them for Twitter auth (if they're still valid)
-        self.set_secure_cookie('access_token_key', access_token.key)
-        self.set_secure_cookie('access_token_secret', access_token.secret)
-
         logging.warn('Access tokens: %r, %r' %
                      (access_token.key, access_token.secret))
 
         api = tweepy.API(auth)
         user = api.me()
-
-        # Store the user ID in memcached
-        cache_key = access_token.key + access_token.secret
-        memcache.set(cache_key, user.id)
 
         # If we don't have a User object for this Twitter account already,
         # create one and start the import process.
@@ -67,10 +58,16 @@ class CallbackHandler(RequestHandler):
         if User.get(key) is None:
             logging.info('Creating new User object for %s (%d)' % (
                     user.screen_name, user.id))
-            user = User(key=key, id=user.id, screen_name=user.screen_name)
+            user = User(key=key, id=user.id,
+                        screen_name=user.screen_name,
+                        api_key=access_token.key,
+                        api_secret=access_token.secret)
             user.put()
             # Start the initial import for this user
-            deferred.defer(initial_import, user.id, access_token.key,
-                           access_token.secret)
+            deferred.defer(initial_import, user.id)
+
+        # Store the user's ID, so we can look them up in the datastore when
+        # they return.
+        self.set_secure_cookie('user_id', str(user.id))
 
         return self.redirect('/')

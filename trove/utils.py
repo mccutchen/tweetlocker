@@ -6,7 +6,7 @@ def make_tweet(user, tweetobj):
     """Creates a Tweet entity for the given tweepy API tweet object.  The new
     Tweet is never put to the datastore and any post-processing tasks are NOT
     fired off."""
-    logging.info('Making Tweet %s' % tweetobj.id)
+    #logging.info('Making Tweet %s' % tweetobj.id)
 
     # Copy fields that are a 1-to-1 match
     exclude = set(('coordinates', 'place', 'source', 'source_url'))
