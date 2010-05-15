@@ -57,11 +57,18 @@ class Place(db.Model):
     country_code = db.StringProperty()
     url = db.LinkProperty()
     country_code = db.StringProperty()
-    bounding_box = db.ListProperty(db.GeoPt)
+    coordinates = db.GeoPtProperty()
+
+    # Denormalized count, should be updated when new tweets are added to the
+    # datastore.
+    tweet_count = db.IntegerProperty(default=0)
 
     @property
     def user(self):
         return self.parent()
+
+    def __unicode__(self):
+        return self.name
 
 
 class Tweet(Searchable, db.Model):
@@ -76,6 +83,8 @@ class Tweet(Searchable, db.Model):
     in_reply_to_user_id = db.IntegerProperty()
     in_reply_to_status_id = db.IntegerProperty()
     favorited = db.BooleanProperty(default=False)
+
+    has_coordinates = db.BooleanProperty(default=False) # Optimization
     coordinates = db.GeoPtProperty()
     place = db.ReferenceProperty(Place, collection_name='tweets')
 
