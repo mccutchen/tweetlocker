@@ -2,9 +2,10 @@
 <html>
     <head>
         <title>{% block title %}Home{% endblock %} &mdash; Twitter Trove</title>
+        <link rel="stylesheet" href="/static/css/trove.css">
         {% block head %}{% endblock %}
     </head>
-    <body>
+    <body id="{% block bodyid %}{% endblock %}" class="{% block bodyclass %}{% endblock %}">
         <header>
             <h1>Twitter Trove</h1>
         </header>

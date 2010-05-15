@@ -1,0 +1,62 @@
+body {
+    margin: 1em;
+    background-color: #eee;
+    color: #333;
+    font-family: georgia;
+    font-size: 12px;
+}
+
+section {
+    background-color: #fff;
+    padding: 1em;
+    margin: 1em 1em 1em 0;
+    border-right: 2px solid #999;
+    border-bottom: 2px solid #999;
+}
+
+section.tweet.list ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+section.tweet.list ul li {
+    padding: 5px 10px;
+    border-bottom: 1px dotted #ccc;
+}
+
+div.tweet {
+    margin: 1em 0;
+}
+div.tweet p.text {
+    font-size: 14px;
+    overflow: hidden;
+    margin: 0;
+}
+div.tweet div.meta {
+    font: 11px verdana;
+    color: #999;
+}
+
+section.archives.list {
+    
+}
+
+td {
+    padding: 5px 10px;
+    border-bottom: 1px dotted #ccc;
+}
+
+
+/* Front page styles */
+body#index section {
+    display: inline-block;
+}
+
+section#latest-tweets {
+    max-width: 45em;
+    float: left;
+}
+
+section#latest-tweets ul li:first-child div.tweet p.text {
+    font-size: 2em;
+}
