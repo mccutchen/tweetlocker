@@ -102,9 +102,8 @@ def post_process_tweet(tweet_id, user_id):
 
 def update_mention_archives(tweet, user):
     mentions = re.findall(r'@(\w+)', tweet.text)
-    if mentions:
-        logging.info('Found mentions of %s in tweet %s' %
-                     (', '.join(mentions), tweet.id))
+    for mention in mentions:
+        make_mention_archive(user, mention, tweet)
 
 def update_date_archives(tweet, user):
     """Increments the tweet_count field on each of the date archive models

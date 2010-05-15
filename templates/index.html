@@ -33,6 +33,16 @@
                 {% endfor %}
             {% endfor %}
         </table>
+
+        <h3>Your mentions</h3>
+        <table>
+            {% for mention in mention_archives %}
+                <tr>
+                    <td>{{ mention }}</td>
+                    <td>{{ mention.tweets|length }}</td>
+                </tr>
+            {% endfor %}
+        </table>
     {% else %}
         <a href="/oauth/login"><img src="/static/img/signin.png" alt="Sign in with Twitter">
     {% endif %}

@@ -87,9 +87,11 @@ class Tweet(Searchable, db.Model):
 class MentionArchive(db.Model):
     """A collection of a particular user's mentions of a particular other
     user. Should be created with a User as its parent."""
-    user_id = db.IntegerProperty(required=True)
     screen_name = db.StringProperty(required=True)
     tweets = db.ListProperty(db.Key)
+
+    def __unicode__(self):
+        return u'@%s' % self.screen_name
 
 
 class DateArchive(db.Model):

@@ -20,24 +20,36 @@ class IndexHandler(RequestHandler):
         key = self.get_secure_cookie('access_token_key')
         secret = self.get_secure_cookie('access_token_secret')
 
-        if key and secret:
-            user_id = memcache.get(key+secret)
-            if user_id is None:
-                api = oauth.utils.make_api(key, secret)
-                user_id = str(api.me().id)
-                memcache.set(key+secret, user_id)
-            user = User.get_by_key_name(str(user_id))
-        else:
-            user = None
+        # If we don't have a user to work with, bail early.
+        if not key or not secret:
+            return self.render('index.html')
 
-        tweets = user.tweets.order('-created_at').fetch(20) if user else []
+        # Authenticated users will have their Twitter API access token info
+        # stored in secure cookies.  The token info is used to store the
+        # user's ID in memcache.  That ID can then be used to get the User
+        # object from the datastore.
+        user_id = memcache.get(key+secret)
+        if user_id is None:
+            api = oauth.utils.make_api(key, secret)
+            user_id = str(api.me().id)
+            memcache.set(key+secret, user_id)
+        user = User.get_by_key_name(str(user_id))
+
+        # Gather up the info we need for the front page.
+        tweets = user.tweets.order('-created_at').fetch(20)
+
         months = user.months.fetch(user.tweet_count)
         date_archives = [(k, list(g)) for k, g in
                          groupby(months, attrgetter('year'))]
+
+        mention_archives = user.mentions.fetch(user.tweet_count)
+        mention_archives.sort(key=lambda x: len(x.tweets), reverse=True)
+
         context = {
             'user': user,
             'tweets': tweets,
             'date_archives': date_archives,
+            'mention_archives': mention_archives,
             }
         self.render('index.html', context)
 
