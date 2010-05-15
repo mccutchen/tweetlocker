@@ -25,6 +25,18 @@ indexes:
   - name: month
     direction: desc
 
+- kind: Place
+  ancestor: yes
+  properties:
+  - name: tweet_count
+    direction: desc
+
+- kind: Source
+  ancestor: yes
+  properties:
+  - name: tweet_count
+    direction: desc
+
 - kind: Tweet
   ancestor: yes
   properties:

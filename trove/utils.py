@@ -1,20 +1,26 @@
 import logging
 from google.appengine.ext import db, deferred
-from models import User, Tweet, Place, MentionArchive
+from models import User, Tweet, Place, Source, MentionArchive
 
 def make_tweet(user, tweetobj):
     """Creates a Tweet entity for the given tweepy API tweet object.  The new
     Tweet is never put to the datastore and any post-processing tasks are NOT
     fired off."""
+    logging.info('Making Tweet %s' % tweetobj.id)
 
     # Copy fields that are a 1-to-1 match
-    exclude = set(('coordinates', 'place'))
+    exclude = set(('coordinates', 'place', 'source', 'source_url'))
     fields = set(Tweet.properties()) - exclude
     props = dict((field, getattr(tweetobj, field, None)) for field in fields)
 
     # Create a Tweet entity with the properties copied from the tweepy object
     key = db.Key.from_path('User', str(user.id), 'Tweet', str(tweetobj.id))
     tweet = Tweet(key=key, **props)
+
+    if tweetobj.source:
+        tweet.source = make_source(
+            user, tweetobj.source, getattr(tweetobj, 'source_url', None))
+        tweet.has_source = True
 
     if tweetobj.coordinates:
         # Twitter's coordinates are backwards
@@ -54,6 +60,24 @@ def make_place(user, placedata):
             place.put()
         return place
 
+    return db.run_in_transaction(txn)
+
+def make_source(user, name, url=None):
+    """Makes a Source object for the given user's account with the given name
+    and optional URL."""
+    key = db.Key.from_path('User', str(user.id),
+                           'Source', str(name))
+    def txn():
+        source = Source.get(key)
+        if not source:
+            source = Source(key=key, name=name)
+            if url:
+                try:
+                    source.url = url
+                except:
+                    logging.warn('Invalid source URL: %s' % url)
+            source.put()
+        return source
     return db.run_in_transaction(txn)
 
 def make_mention_archive(user, mentioned_user, tweet):

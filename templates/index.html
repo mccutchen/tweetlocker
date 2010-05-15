@@ -63,4 +63,16 @@
             {% endfor %}
         </table>
     </section>
+
+    <section id="sources" class="archives list">
+        <h3>Sources</h3>
+        <table cellspacing="0">
+            {% for source in sources %}
+                <tr>
+                    <td>{{ source }}</td>
+                    <td>{{ source.tweet_count }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </section>
 {% endblock %}

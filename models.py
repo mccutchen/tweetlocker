@@ -17,11 +17,15 @@ class User(db.Model):
 
     @property
     def tweets(self):
-        return db.Query(Tweet).ancestor(self)
+        return db.Query(Tweet).ancestor(self).order('-created_at')
 
     @property
     def places(self):
-        return db.Query(Place).ancestor(self)
+        return db.Query(Place).ancestor(self).order('-tweet_count')
+
+    @property
+    def sources(self):
+        return db.Query(Source).ancestor(self).order('-tweet_count')
 
     @property
     def mentions(self):
@@ -71,6 +75,19 @@ class Place(db.Model):
         return self.name
 
 
+class Source(db.Model):
+    """A client used by a user to make a tweet.  Should be created with a
+    specific User instance as its parent.  This corresponds to the source and
+    source_url info returned by the Twitter API."""
+    name = db.StringProperty()
+    url = db.LinkProperty()
+
+    tweet_count = db.IntegerProperty(default=0)
+
+    def __unicode__(self):
+        return self.name
+
+
 class Tweet(Searchable, db.Model):
     """An individual tweet.  Should be created with a specific User instance
     as its parent."""
@@ -78,15 +95,16 @@ class Tweet(Searchable, db.Model):
     text = db.TextProperty(required=True)
     created_at = db.DateTimeProperty(required=True)
 
-    source = db.StringProperty()
-    source_url = db.LinkProperty()
     in_reply_to_user_id = db.IntegerProperty()
     in_reply_to_status_id = db.IntegerProperty()
     favorited = db.BooleanProperty(default=False)
 
-    has_coordinates = db.BooleanProperty(default=False) # Optimization
+    has_coordinates = db.BooleanProperty(default=False) # Query optimization
     coordinates = db.GeoPtProperty()
     place = db.ReferenceProperty(Place, collection_name='tweets')
+
+    has_source = db.BooleanProperty(default=False)
+    source = db.ReferenceProperty(Source, collection_name='tweets')
 
     @property
     def user(self):

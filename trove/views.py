@@ -42,7 +42,7 @@ class IndexHandler(RequestHandler):
             return self.render('welcome.html')
 
         # Gather up the info we need for the front page.
-        tweets = user.tweets.order('-created_at').fetch(20)
+        tweets = user.tweets.fetch(20)
 
         months = user.months.fetch(user.tweet_count)
         date_archives = [(k, list(g)) for k, g in
@@ -52,6 +52,7 @@ class IndexHandler(RequestHandler):
         mention_archives.sort(key=lambda x: len(x.tweets), reverse=True)
 
         places = user.places.fetch(user.tweet_count)
+        sources = user.sources.fetch(user.tweet_count)
 
         context = {
             'user': user,
@@ -59,6 +60,7 @@ class IndexHandler(RequestHandler):
             'date_archives': date_archives,
             'mention_archives': mention_archives,
             'places': places,
+            'sources': sources,
             }
         self.render('index.html', context)
 
