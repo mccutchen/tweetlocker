@@ -39,6 +39,10 @@ class User(db.Model):
         return db.Query(MentionArchive).ancestor(self)
 
     @property
+    def tags(self):
+        return db.Query(TagArchive).ancestor(self)
+
+    @property
     def years(self):
         return db.Query(YearArchive).ancestor(self).order('-year')
 

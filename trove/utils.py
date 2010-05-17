@@ -1,6 +1,6 @@
 import logging
 from google.appengine.ext import db, deferred
-from models import User, Tweet, Place, Source, MentionArchive
+from models import User, Tweet, Place, Source, MentionArchive, TagArchive
 
 def make_tweet(user, tweetobj):
     """Creates a Tweet entity for the given tweepy API tweet object.  The new
@@ -94,6 +94,19 @@ def make_mention_archive(user, mentioned_user, tweet):
             archive.put()
         return archive
 
+    archive = db.run_in_transaction(txn)
+    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
+
+def make_tag_archive(user, tag, tweet):
+    """Adds the given tweet to the given user's archive for the given tag,
+    creating the archive if necessary."""
+    key = db.Key.from_path('User', str(user.id), 'TagArchive', tag)
+    def txn():
+        archive = TagArchive.get(key)
+        if not archive:
+            archive = TagArchive(key=key, tag=tag)
+            archive.put()
+        return archive
     archive = db.run_in_transaction(txn)
     db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
 

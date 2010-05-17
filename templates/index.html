@@ -52,6 +52,18 @@
         </table>
     </section>
 
+    <section id="mention-archives" class="archives list">
+        <h3>Tags</h3>
+        <table cellspacing="0">
+            {% for tag in tag_archives %}
+                <tr>
+                    <td>{{ tag }}</td>
+	                    <td>{{ tag.tweets|length }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </section>
+
     <section id="places" class="archives list">
         <h3>Places</h3>
         <table cellspacing="0">

@@ -35,6 +35,9 @@ class IndexHandler(RequestHandler):
         mention_archives = user.mentions.fetch(user.tweet_count)
         mention_archives.sort(key=lambda x: len(x.tweets), reverse=True)
 
+        tag_archives = user.tags.fetch(user.tweet_count)
+        tag_archives.sort(key=lambda x: len(x.tweets), reverse=True)
+
         places = user.places.fetch(user.tweet_count)
         sources = user.sources.fetch(user.tweet_count)
 
@@ -43,6 +46,7 @@ class IndexHandler(RequestHandler):
             'tweets': tweets,
             'date_archives': date_archives,
             'mention_archives': mention_archives,
+            'tag_archives': tag_archives,
             'places': places,
             'sources': sources,
             }

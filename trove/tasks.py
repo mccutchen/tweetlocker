@@ -5,7 +5,8 @@ from google.appengine.ext import db, deferred
 import tweepy
 
 from oauth.utils import make_api, make_auth
-from utils import make_tweet, make_mention_archive, add_to_list
+from utils import (make_tweet, make_mention_archive, make_tag_archive,
+                   add_to_list)
 
 from models import User, Tweet, Place
 from models import YearArchive, MonthArchive, DayArchive, WeekArchive
@@ -98,6 +99,7 @@ def post_process_tweet(tweet_id, user_id):
     #logging.info('Post-processing tweet %s...' % tweet_id)
     update_date_archives(tweet, user)
     update_mention_archives(tweet, user)
+    update_tag_archives(tweet, user)
 
     if tweet.place:
         tweet.place.tweet_count = tweet.place.tweets.count()
@@ -123,6 +125,14 @@ def update_mention_archives(tweet, user):
         else:
             for mention in mentions:
                 make_mention_archive(user, mention, tweet)
+
+def update_tag_archives(tweet, user):
+    """Scans the given tweet for any hashtags (like #tagname) and adds them to
+    the archive for the given user's use of that tag.  The archive will be
+    created if it needs to be."""
+    tags = re.findall(r'#(\w+)', tweet.text)
+    for tag in tags:
+        make_tag_archive(user, tag, tweet)
 
 def update_date_archives(tweet, user):
     """Increments the tweet_count field on each of the date archive models
