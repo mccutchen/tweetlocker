@@ -126,27 +126,31 @@ class Tweet(Searchable, db.Model):
         return self.parent()
 
 
-class MentionArchive(db.Model):
+class Archive(db.Model):
+    """A generic archive model. Contains tweets, a list of Tweet keys, and
+    tweet_count, the denormalized number of items in the list of Tweets."""
+
+    tweets = db.ListProperty(db.Key)
+    tweet_count = db.IntegerProperty(default=0)
+
+
+class MentionArchive(Archive):
     """A collection of a particular user's mentions of a particular other
     user. Should be created with a User as its parent."""
     id = db.IntegerProperty(required=True)
     screen_name = db.StringProperty(required=True)
-    tweets = db.ListProperty(db.Key)
 
     def __unicode__(self):
         return u'@%s' % self.screen_name
 
 
-class DateArchive(db.Model):
+class DateArchive(Archive):
+    """A generic date-based archive of tweets. Used as the parent of the
+    more-specific year, month, day, etc. archives."""
+
     # A strftime() format string used to create the key name for an instance
     # based on an arbitrary datetime object.
     KEY_NAME = None
-
-    # The keys of the tweets that are in this archive
-    tweets = db.ListProperty(db.Key)
-
-    def __str__(self):
-        return unicode(self).encode('utf-8', 'ignore')
 
 class YearArchive(DateArchive):
     KEY_NAME = '%Y'
