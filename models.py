@@ -172,6 +172,7 @@ class DayArchive(DateArchive):
     year = db.IntegerProperty(required=True)
     month = db.IntegerProperty(required=True)
     day = db.IntegerProperty(required=True)
+    weekday = db.IntegerProperty(required=True)
 
     def __unicode__(self):
         return unicode(self.day)

@@ -138,7 +138,7 @@ def update_date_archives(tweet, user):
     key = created_at.strftime(DayArchive.KEY_NAME)
     archive = DayArchive.get_or_insert(
         key, parent=user, year=created_at.year, month=created_at.month,
-        day=created_at.day)
+        day=created_at.day, weekday=created_at.weekday())
     db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
 
     # Week
