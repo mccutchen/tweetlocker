@@ -108,14 +108,21 @@ def post_process_tweet(tweet_id, user_id):
         tweet.source.put()
 
 def update_mention_archives(tweet, user):
+    """Scans the given tweet for mentions of other Twitter users (like
+    @username) and adds them to the archive for the given user's mentions of
+    the other user.  The archive will be created if it needs to be.
+
+    Attempts to look the users up via the Twitter API's lookup method, so we
+    can have authoritative user IDs to go on."""
     mentions = re.findall(r'@(\w+)', tweet.text)
-    try:
-        mentions = user.api.lookup_users(screen_names=mentions)
-    except tweepy.TweepError, e:
-        logging.error('Could not look up users: %s' % ','.join(mentions))
-    else:
-        for mention in mentions:
-            make_mention_archive(user, mention, tweet)
+    if mentions:
+        try:
+            mentions = user.api.lookup_users(screen_names=mentions)
+        except tweepy.TweepError, e:
+            logging.error('Could not look up users: %s' % ','.join(mentions))
+        else:
+            for mention in mentions:
+                make_mention_archive(user, mention, tweet)
 
 def update_date_archives(tweet, user):
     """Increments the tweet_count field on each of the date archive models
