@@ -144,6 +144,14 @@ class MentionArchive(Archive):
         return u'@%s' % self.screen_name
 
 
+class TagArchive(Archive):
+    """A collection of a particular user's hashtags."""
+    tag = db.StringProperty(required=True)
+
+    def __unicode__(self):
+        return u'#%s' % self.tag
+
+
 class DateArchive(Archive):
     """A generic date-based archive of tweets. Used as the parent of the
     more-specific year, month, day, etc. archives."""
