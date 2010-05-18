@@ -6,7 +6,7 @@ import tweepy
 
 from oauth.utils import make_api, make_auth
 from utils import (make_tweet, make_mention_archive, make_tag_archive,
-                   add_to_list)
+                   make_date_archives)
 
 from models import User, Tweet, Place
 from models import YearArchive, MonthArchive, DayArchive, WeekArchive
@@ -88,7 +88,7 @@ def initial_import(user_id, max_id=None):
 
 def post_process_tweet(tweet_id, user_id):
     """A deferred task that should be called after a Tweet is created."""
-	# TODO: place, @mention and date archive aggregation, search indexing
+	# TODO: search indexing
     user_key = db.Key.from_path('User', str(user_id))
     tweet_key = db.Key.from_path('User', str(user_id), 'Tweet', str(tweet_id))
     user, tweet = db.get([user_key, tweet_key])
@@ -96,11 +96,12 @@ def post_process_tweet(tweet_id, user_id):
         return logging.error('Could not post-process tweet %s for user %s' %
                              (tweet_id, user_id))
 
-    #logging.info('Post-processing tweet %s...' % tweet_id)
     update_date_archives(tweet, user)
     update_mention_archives(tweet, user)
     update_tag_archives(tweet, user)
+    update_date_archives(tweet, user)
 
+    # Update denormalized counts on reference properties
     if tweet.place:
         tweet.place.tweet_count = tweet.place.tweets.count()
         tweet.place.put()
@@ -135,32 +136,6 @@ def update_tag_archives(tweet, user):
         make_tag_archive(user, tag, tweet)
 
 def update_date_archives(tweet, user):
-    """Increments the tweet_count field on each of the date archive models
-    (creating them if necessary) for the given tweet."""
-    created_at = tweet.created_at
-
-    # Year
-    key = created_at.strftime(YearArchive.KEY_NAME)
-    archive = YearArchive.get_or_insert(
-        key, parent=user, year=created_at.year)
-    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
-
-    # Month
-    key = created_at.strftime(MonthArchive.KEY_NAME)
-    archive = MonthArchive.get_or_insert(
-        key, parent=user, year=created_at.year, month=created_at.month)
-    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
-
-    # Day
-    key = created_at.strftime(DayArchive.KEY_NAME)
-    archive = DayArchive.get_or_insert(
-        key, parent=user, year=created_at.year, month=created_at.month,
-        day=created_at.day, weekday=created_at.weekday())
-    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
-
-    # Week
-    key = created_at.strftime(WeekArchive.KEY_NAME)
-    week = int(created_at.strftime('%U'))
-    archive = WeekArchive.get_or_insert(
-        key, parent=user, year=created_at.year, week=week)
-    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
+    """Just calls the make_date_archives utility function to add the tweet to
+    the appropriate date archives for the given user."""
+    make_date_archives(user, tweet)

@@ -1,6 +1,7 @@
 import logging
 from google.appengine.ext import db, deferred
-from models import User, Tweet, Place, Source, MentionArchive, TagArchive
+from models import *
+
 
 def make_tweet(user, tweetobj):
     """Creates a Tweet entity for the given tweepy API tweet object.  The new
@@ -95,7 +96,7 @@ def make_mention_archive(user, mentioned_user, tweet):
         return archive
 
     archive = db.run_in_transaction(txn)
-    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
+    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
 
 def make_tag_archive(user, tag, tweet):
     """Adds the given tweet to the given user's archive for the given tag,
@@ -108,16 +109,59 @@ def make_tag_archive(user, tag, tweet):
             archive.put()
         return archive
     archive = db.run_in_transaction(txn)
-    db.run_in_transaction(add_to_list, archive.key(), 'tweets', tweet.key())
+    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
 
-def increment_counter(key, field='tweet_count', amount=1):
+def make_date_archives(user, tweet):
+    """Adds the given tweet to the appropriate date archives, based on the
+    tweet's date, for the given user."""
+    created_at = tweet.created_at
+
+    # Year
+    key = created_at.strftime(YearArchive.KEY_NAME)
+    archive = YearArchive.get_or_insert(
+        key, parent=user, year=created_at.year)
+    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+
+    # Month
+    key = created_at.strftime(MonthArchive.KEY_NAME)
+    archive = MonthArchive.get_or_insert(
+        key, parent=user, year=created_at.year, month=created_at.month)
+    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+
+    # Day
+    key = created_at.strftime(DayArchive.KEY_NAME)
+    archive = DayArchive.get_or_insert(
+        key, parent=user, year=created_at.year, month=created_at.month,
+        day=created_at.day, weekday=created_at.weekday())
+    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+
+    # Week
+    key = created_at.strftime(WeekArchive.KEY_NAME)
+    week = int(created_at.strftime('%U'))
+    archive = WeekArchive.get_or_insert(
+        key, parent=user, year=created_at.year, week=week)
+    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+
+
+def archive_tweet(archive_key, tweet_key):
+    """Utility function to add a tweet to an archive.  Adds the Tweet's key to
+    the archive's tweets list and updates the archive's denormalized
+    tweet_count."""
+    archive = db.get(archive_key)
+    archive.tweets.append(tweet_key)
+    archive.tweet_count = len(archive.tweets)
+    archive.put()
+
+def increment_counter(key, field='tweet_count', amount=1, commit=True):
     """A utility function, designed to be used in a transaction, that will
     update a field on a object by an arbirtrary amount."""
     obj = db.get(key)
     setattr(obj, field, getattr(obj, field) + amount)
-    obj.put()
+    if commit:
+        obj.put()
+    return obj
 
-def add_to_list(key, field, value):
+def add_to_list(key, field, value, commit=True):
     """Adds the given value to the given field on the entity with the given
     key.  The field must be a ListProperty, and the value must be of the
     correct type.  Expected to be used in a transaction."""
@@ -125,4 +169,6 @@ def add_to_list(key, field, value):
     values = getattr(obj, field)
     values.append(value)
     setattr(obj, field, values)
-    obj.put()
+    if commit:
+        obj.put()
+    return obj
