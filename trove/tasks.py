@@ -80,8 +80,16 @@ def initial_import(user_id, max_id=None):
     # Otherwise, the import has finished.  Update the user accordingly.
     else:
         logging.info('Initial import finished!')
-        last_tweet = user.tweets.order('-created_at').get()
+
+        # Note the latest tweet, so we know where to start importing new ones.
+        last_tweet = user.tweets.get()
         user.latest_tweet_id = last_tweet.id if last_tweet else None
+
+        # Note the date of the oldest tweet for the user, for graphs.
+        old_key = db.Key.from_path('Tweet', str(max_id+1), parent=user.key())
+        old_tweet = db.get(old_key)
+        user.oldest_tweet_at = old_tweet.created_at
+
         user.tweet_count = user.tweets.count()
         user.import_finished = True
         user.put()
