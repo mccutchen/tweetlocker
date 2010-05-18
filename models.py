@@ -36,11 +36,11 @@ class User(db.Model):
 
     @property
     def mentions(self):
-        return db.Query(MentionArchive).ancestor(self)
+        return db.Query(MentionArchive).ancestor(self).order('-tweet_count')
 
     @property
     def tags(self):
-        return db.Query(TagArchive).ancestor(self)
+        return db.Query(TagArchive).ancestor(self).order('-tweet_count')
 
     @property
     def years(self):

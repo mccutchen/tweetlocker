@@ -10,6 +10,12 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: MentionArchive
+  ancestor: yes
+  properties:
+  - name: tweet_count
+    direction: desc
+
 - kind: MonthArchive
   ancestor: yes
   properties:
@@ -32,6 +38,12 @@ indexes:
     direction: desc
 
 - kind: Source
+  ancestor: yes
+  properties:
+  - name: tweet_count
+    direction: desc
+
+- kind: TagArchive
   ancestor: yes
   properties:
   - name: tweet_count
