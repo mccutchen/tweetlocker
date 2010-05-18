@@ -72,6 +72,9 @@ class User(db.Model):
         self._api = make_api(self.api_key, self.api_secret)
         return self._api
 
+    def __unicode__(self):
+        return u'@%s' % self.screen_name
+
 
 class Place(db.Model):
     """A specific place from which a user has made at least one tweet.  Should

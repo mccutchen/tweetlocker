@@ -7,6 +7,7 @@ from google.appengine.api import memcache
 
 import tweepy
 from lib.handlers import RequestHandler
+from lib.decorators import login_required
 
 import settings
 import oauth.utils
@@ -16,10 +17,9 @@ from models import User
 class IndexHandler(RequestHandler):
 
     def get(self):
-        user_id = self.get_secure_cookie('user_id')
-        user = User.get_by_key_name(str(user_id))
 
         # If we don't have a user to work with, bail early.
+        user = self.current_user
         if not user:
             if user_id:
                 logging.warn('User %s missing from datastore' % user_id)

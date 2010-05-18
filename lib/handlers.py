@@ -1,12 +1,21 @@
 import tornado.web
 from lib.jinja import render_to_string
+from models import User
+
 
 DEFAULT_STATUS = 200
 DEFAULT_MIMETYPE = 'text/html'
 
 
 class RequestHandler(tornado.web.RequestHandler):
-    """A custom Tornado RequestHandler that renders Jinja2 templates."""
+    """A custom Tornado RequestHandler that knows how to tell if a user has
+    logged in via Twitter and renders Jinja2 templates."""
+
+    def get_current_user(self):
+        """A user is considered to be logged in via Twitter if they have their
+        user_id stored in a secure cookie."""
+        user_id = self.get_secure_cookie('user_id')
+        return User.get_by_key_name(user_id) if user_id else None
 
     def render(self, template, context=None, status=None, mimetype=None):
         context = context or {}
