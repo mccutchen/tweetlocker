@@ -1,5 +1,3 @@
-from tornado.web import URLSpec as Url
-
 import trove.views
 import oauth.views
 
@@ -14,15 +12,15 @@ archives_pattern = r'^/%s/$' % archive_types
 archive_pattern = r'^/%s/(\d+)/$' % archive_types
 
 urls = [
-    Url(r'^/$', trove.views.IndexHandler, name='index'),
+    (r'^/$', trove.views.IndexHandler),
 
-    Url(r'^/search/$', trove.views.SearchHandler, name='search'),
+    (r'^/search/$', trove.views.SearchHandler),
 
-    Url(r'^/dates/$', trove.views.DatesHandler, name='dates'),
-    Url(r'^/dates/(\d+)/(\d+)/$', trove.views.DateHandler, name='date'),
+    (r'^/dates/$', trove.views.DatesHandler),
+    (r'^/dates/(\d+)/(\d+)/$', trove.views.DateHandler),
 
-    Url(archives_pattern, trove.views.ArchivesHandler, name='archives'),
-    Url(archive_pattern, trove.views.ArchiveHandler, name='archive'),
+    (archives_pattern, trove.views.ArchivesHandler),
+    (archive_pattern, trove.views.ArchiveHandler),
 
     (r'^/oauth/login$', oauth.views.LoginHandler),
     (r'^/oauth/callback$', oauth.views.CallbackHandler),

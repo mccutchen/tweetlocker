@@ -30,10 +30,7 @@ class IndexHandler(RequestHandler):
     def get(self):
 
         # If we don't have a user to work with, bail early.
-        user = self.current_user
-        if not user:
-            if user_id:
-                logging.warn('User %s missing from datastore' % user_id)
+        if not self.user:
             return self.render('welcome.html')
 
         # Gather up the info we need for the front page.
@@ -82,7 +79,7 @@ class ArchivesHandler(RequestHandler):
     @login_required
     def get(self, kind):
 
-        user = self.current_user
+        user = self.user
         query = getattr(user, kind)
         archives = query.fetch(user.tweet_count)
         last_tweets = db.get([archive.tweets[0] for archive in archives])
