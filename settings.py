@@ -13,6 +13,9 @@ OAUTH_CALLBACK = 'http://%s/oauth/callback' % \
 # How many tweets to fetch at once
 BATCH_SIZE = 100
 
+# How many items of interest to display in each list on the front page
+ARCHIVE_LIST_SIZE = 10
+
 TEMPLATE_DIR = os.path.join(PROJECT_ROOT, 'templates')
 
 

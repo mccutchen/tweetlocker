@@ -28,18 +28,17 @@ class IndexHandler(RequestHandler):
         # Gather up the info we need for the front page.
         tweets = user.tweets.fetch(20)
 
+        # We have to do some special gymnastics to give the templates a usable
+        # datastructure for date archives, a list of (year, [months]) tuples.
         months = user.months.fetch(user.tweet_count)
         date_archives = [(k, list(g)) for k, g in
                          groupby(months, attrgetter('year'))]
 
-        mention_archives = user.mentions.fetch(user.tweet_count)
-        mention_archives.sort(key=lambda x: len(x.tweets), reverse=True)
-
-        tag_archives = user.tags.fetch(user.tweet_count)
-        tag_archives.sort(key=lambda x: len(x.tweets), reverse=True)
-
-        places = user.places.fetch(user.tweet_count)
-        sources = user.sources.fetch(user.tweet_count)
+        # Fetch the top N items from the other categories to display
+        mention_archives = user.mentions.fetch(settings.ARCHIVE_LIST_SIZE)
+        tag_archives = user.tags.fetch(settings.ARCHIVE_LIST_SIZE)
+        places = user.places.fetch(settings.ARCHIVE_LIST_SIZE)
+        sources = user.sources.fetch(settings.ARCHIVE_LIST_SIZE)
 
         context = {
             'user': user,
