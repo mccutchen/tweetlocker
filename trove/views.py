@@ -74,7 +74,18 @@ class ClientHandler(RequestHandler):
     pass
 
 class MentionsHandler(RequestHandler):
-    pass
+
+    @login_required
+    def get(self):
+
+        user = self.current_user
+        archives = user.mentions.fetch(user.tweet_count)
+        last_tweets = db.get([archive.tweets[0] for archive in archives])
+
+        context = {
+            'archives': zip(archives, last_tweets),
+            }
+        self.render('mentions.html', context)
 
 class MentionHandler(RequestHandler):
     pass
