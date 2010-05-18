@@ -1,22 +1,28 @@
+from tornado.web import URLSpec as Url
+
 import trove.views
 import oauth.views
 
+# A regular expression grouping of the names of the kinds of archives we know
+# how to handle generically.
+archive_types = '(%s)' % '|'.join(trove.views.GENERIC_ARCHIVE_MAP)
+
+# The pattern for an archive's index page (e.g. /mentions/)
+archives_pattern = r'^/%s/$' % archive_types
+
+# The pattern for an individual archive page (e.g. /mentions/1234/)
+archive_pattern = r'^/%s/(\d+)/$' % archive_types
+
 urls = [
-    (r'^/$', trove.views.IndexHandler),
+    Url(r'^/$', trove.views.IndexHandler, name='index'),
 
-    (r'^/search/$', trove.views.SearchHandler),
+    Url(r'^/search/$', trove.views.SearchHandler, name='search'),
 
-    (r'^/dates/$', trove.views.DatesHandler),
-    (r'^/dates/(\d+)/(\d+)/$', trove.views.DateHandler),
+    Url(r'^/dates/$', trove.views.DatesHandler, name='dates'),
+    Url(r'^/dates/(\d+)/(\d+)/$', trove.views.DateHandler, name='date'),
 
-    (r'^/places/$', trove.views.PlacesHandler),
-    (r'^/places/(\d+)/$', trove.views.PlaceHandler),
-
-    (r'^/clients/$', trove.views.ClientsHandler),
-    (r'^/clients/(\d+)/$', trove.views.ClientHandler),
-
-    (r'^/mentions/$', trove.views.MentionsHandler),
-    (r'^/mentions/(\d+)/$', trove.views.MentionHandler),
+    Url(archives_pattern, trove.views.ArchivesHandler, name='archives'),
+    Url(archive_pattern, trove.views.ArchiveHandler, name='archive'),
 
     (r'^/oauth/login$', oauth.views.LoginHandler),
     (r'^/oauth/callback$', oauth.views.CallbackHandler),

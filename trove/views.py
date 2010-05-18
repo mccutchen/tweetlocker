@@ -11,7 +11,18 @@ from lib.decorators import login_required
 
 import settings
 import oauth.utils
+
 from models import User
+from models import MentionArchive, Place, Source, TagArchive
+
+
+# Map archive types as they appear in URLs to model classes
+GENERIC_ARCHIVE_MAP = {
+    'mentions': MentionArchive,
+    'places': Place,
+    'sources': Source,
+    'tags': TagArchive,
+    }
 
 
 class IndexHandler(RequestHandler):
@@ -40,14 +51,16 @@ class IndexHandler(RequestHandler):
         places = user.places.fetch(settings.ARCHIVE_LIST_SIZE)
         sources = user.sources.fetch(settings.ARCHIVE_LIST_SIZE)
 
+        generic_archives = []
+        for kind, model in GENERIC_ARCHIVE_MAP.items():
+            archives = getattr(user, kind).fetch(settings.ARCHIVE_LIST_SIZE)
+            generic_archives.append((model.__name__, kind, archives))
+
         context = {
             'user': user,
             'tweets': tweets,
             'date_archives': date_archives,
-            'mention_archives': mention_archives,
-            'tag_archives': tag_archives,
-            'places': places,
-            'sources': sources,
+            'generic_archives': generic_archives,
             }
         self.render('index.html', context)
 
@@ -55,37 +68,32 @@ class IndexHandler(RequestHandler):
 class SearchHandler(RequestHandler):
     pass
 
+
 class DatesHandler(RequestHandler):
     pass
+
 
 class DateHandler(RequestHandler):
     pass
 
-class PlacesHandler(RequestHandler):
-    pass
 
-class PlaceHandler(RequestHandler):
-    pass
-
-class ClientsHandler(RequestHandler):
-    pass
-
-class ClientHandler(RequestHandler):
-    pass
-
-class MentionsHandler(RequestHandler):
+class ArchivesHandler(RequestHandler):
 
     @login_required
-    def get(self):
+    def get(self, kind):
 
         user = self.current_user
-        archives = user.mentions.fetch(user.tweet_count)
+        query = getattr(user, kind)
+        archives = query.fetch(user.tweet_count)
         last_tweets = db.get([archive.tweets[0] for archive in archives])
 
         context = {
             'archives': zip(archives, last_tweets),
             }
-        self.render('mentions.html', context)
+        self.render('archives.html', context)
 
-class MentionHandler(RequestHandler):
-    pass
+class ArchiveHandler(RequestHandler):
+
+    @login_required
+    def get(self, kind, id):
+        pass
