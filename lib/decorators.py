@@ -4,7 +4,7 @@ def login_required(method):
     indicator of this is the presence of a "user_id" secure cookie."""
 
     def decorated_method(self, *args, **kwargs):
-        if self.current_user:
+        if self.user:
             return method(self, *args, **kwargs)
         else:
             self.set_status(403)
