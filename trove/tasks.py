@@ -1,6 +1,8 @@
 import logging
 import re
 
+import lib.env
+
 from google.appengine.ext import db, deferred
 import tweepy
 
