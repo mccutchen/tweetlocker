@@ -30,7 +30,8 @@ class IndexHandler(RequestHandler):
     def get(self):
 
         # If we don't have a user to work with, bail early.
-        if not self.user:
+        user = self.user
+        if not user:
             return self.render('welcome.html')
 
         # Gather up the info we need for the front page.

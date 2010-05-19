@@ -1,13 +1,15 @@
 import base64
-import hashlib
-import hmac
+import calendar
+import datetime
+import email
 import logging
+import re
 import time
 
 from google.appengine.ext import webapp
 from lib.jinja import render_to_string
+import utils
 
-import settings
 from models import User
 
 
@@ -38,6 +40,37 @@ class RequestHandler(webapp.RequestHandler):
         self.response.headers['Content-type'] = mimetype or DEFAULT_MIMETYPE
         self.response.out.write(render_to_string(template, context))
 
+    ##########################################################################
+    # Cookie API and implementation ported from Tornado:
+    # http://github.com/facebook/tornado/blob/master/tornado/web.py
+    ##########################################################################
+    def get_cookie(self, name, default=None):
+        return self.request.cookies.get(name, default)
+
+    def set_cookie(self, name, value, domain=None, expires=None, path="/",
+                     expires_days=None):
+        """Sets the given cookie name/value with the given options."""
+        name = utils.utf8(name)
+        value = utils.utf8(value)
+        if re.search(r"[\x00-\x20]", name + value):
+            # Don't let us accidentally inject bad stuff
+            raise ValueError("Invalid cookie %r: %r" % (name, value))
+        cookie = '%s=%s' % (name, value)
+        buf = [cookie]
+        if domain:
+            buf.append('domain=%s' % domain)
+        if expires_days is not None and not expires:
+            expires = datetime.datetime.utcnow() + datetime.timedelta(
+                days=expires_days)
+        if expires:
+            timestamp = calendar.timegm(expires.utctimetuple())
+            expires = email.utils.formatdate(
+                timestamp, localtime=False, usegmt=True)
+            buf.append('expires=%s' % expires)
+        if path:
+            buf.append('path=%s' % path)
+        self.response.headers.add_header('Set-Cookie', '; '.join(buf))
+
     def set_secure_cookie(self, name, value, **kwargs):
         """Signs and timestamps a cookie so it cannot be forged.
 
@@ -49,9 +82,9 @@ class RequestHandler(webapp.RequestHandler):
         """
         timestamp = str(int(time.time()))
         value = base64.b64encode(value)
-        signature = _cookie_signature(name, value, timestamp)
+        signature = utils.cookie_signature(name, value, timestamp)
         value = "|".join([value, timestamp, signature])
-        self.request.set_cookie(name, value, **kwargs)
+        self.set_cookie(name, value, **kwargs)
 
     def get_secure_cookie(self, name, value=None):
         """Returns the given signed cookie if it validates, or None.
@@ -63,12 +96,12 @@ class RequestHandler(webapp.RequestHandler):
         your users out whose cookies were written with a previous Tornado
         version).
         """
-        if value is None: value = self.request.cookies.get(name)
+        if value is None: value = self.get_cookie(name)
         if not value: return None
         parts = value.split("|")
         if len(parts) != 3: return None
-        signature = _cookie_signature(name, parts[0], parts[1])
-        if not _time_independent_equals(parts[2], signature):
+        signature = utils.cookie_signature(name, parts[0], parts[1])
+        if not utils.time_independent_equals(parts[2], signature):
             logging.warning("Invalid cookie signature %r", value)
             return None
         timestamp = int(parts[1])
@@ -80,17 +113,8 @@ class RequestHandler(webapp.RequestHandler):
         except:
             return None
 
-
-def _cookie_signature(*parts):
-    h = hmac.new(settings.COOKIE_SECRET, digestmod=hashlib.sha1)
-    for part in parts:
-        h.update(part)
-    return h.hexdigest()
-
-def _time_independent_equals(a, b):
-    if len(a) != len(b):
-        return False
-    result = 0
-    for x, y in zip(a, b):
-        result |= ord(x) ^ ord(y)
-    return result == 0
+    def clear_cookie(self, name, path="/", domain=None):
+        """Deletes the cookie with the given name."""
+        expires = datetime.datetime.utcnow() - datetime.timedelta(days=365)
+        self.set_cookie(name, value="", path=path, expires=expires,
+                        domain=domain)

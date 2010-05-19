@@ -38,7 +38,7 @@ class CallbackHandler(RequestHandler):
         self.clear_cookie('request_token_key')
         self.clear_cookie('request_token_secret')
 
-        verifier = self.get_argument('oauth_verifier')
+        verifier = self.request.params.get('oauth_verifier')
         auth.set_request_token(token_key, token_secret)
 
         try:
