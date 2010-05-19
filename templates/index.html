@@ -10,7 +10,7 @@
 
     <section id="welcome">
         <p>Hi there, <strong>{{ user }}</strong>!  Here are some numbers for you:
-        You've made <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.tweet_count }}</a> tweets
+        You've made <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.tweet_count }} tweets</a>
         {%- if user.tag_count %}
             marked with <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.tag_count }} tags</a>
         {% endif -%}

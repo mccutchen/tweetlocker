@@ -1,7 +1,7 @@
 body {
 	margin: 0;
 	padding: 0;
-    background-color: #eee;
+    background-color: #fff;
     color: #333;
     font-family: helvetica, arial, sans-serif;
     font-size: 10px;
@@ -12,6 +12,8 @@ body {
   src: url(../fonts/LeagueGothic.otf) format("opentype");
 }
 
+
+/* Site header */
 header {
 	background-color: #333;
 	background: -webkit-gradient(linear, left top, left bottom, from(#444), to(#222));
@@ -30,12 +32,22 @@ header h1 a {
 	text-decoration: none;
 }
 
+
+div#content {
+    margin: 1em;
+}
+
+
 section {
-    background-color: #fff;
-    padding: 1em;
-    margin: 1em 1em 1em 0;
-    border-right: 2px solid #999;
-    border-bottom: 2px solid #999;
+    margin: 1em 2em;
+}
+
+section h3 {
+    font-family: League Gothic, Helvetica, Arial;
+    text-transform: uppercase;
+    font-size: 3em;
+    margin: 0;
+    padding: 0;
 }
 
 section.tweet.list ul {
@@ -76,11 +88,24 @@ body#index section {
     display: inline-block;
 }
 
+
+section#welcome {
+    margin: .5em 1em;
+    padding: .5em;
+    font-size: 2em;
+    display: block;
+    background-color: #eee;
+    border-radius: 8px;
+    box-shadow: 2px 2px 2px #ccc;
+}
+section#welcome p {
+    margin: 0;
+}
+
 section#latest-tweets {
     max-width: 45em;
     float: left;
 }
-
 section#latest-tweets ul li:first-child div.tweet p.text {
     font-size: 2em;
 }
