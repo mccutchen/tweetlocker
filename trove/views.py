@@ -6,7 +6,7 @@ from google.appengine.ext import db
 from google.appengine.api import memcache
 
 import tweepy
-from lib.handlers import RequestHandler
+from lib.webapp import RequestHandler
 from lib.decorators import login_required
 
 import settings

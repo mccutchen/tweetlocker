@@ -4,7 +4,7 @@ from google.appengine.ext import db, deferred
 from google.appengine.api import memcache
 
 import tweepy
-from lib.handlers import RequestHandler
+from lib.webapp import RequestHandler
 
 from models import User
 from utils import make_auth
