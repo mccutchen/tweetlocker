@@ -1,8 +1,6 @@
 import logging
 import re
 
-import lib.env
-
 from google.appengine.ext import db, deferred
 import tweepy
 
@@ -92,7 +90,10 @@ def initial_import(user_id, max_id=None):
         old_tweet = db.get(old_key)
         user.oldest_tweet_at = old_tweet.created_at
 
-        user.tweet_count = user.tweets.count()
+        # Update denormalized count fields
+        for field in ('tweet', 'place', 'source', 'mention', 'tag'):
+            count = getattr(user, field + 's').count()
+            setattr(user, field + '_count', count)
         user.import_finished = True
         user.put()
 

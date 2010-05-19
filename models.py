@@ -18,14 +18,20 @@ class User(db.Model):
     api_key = db.StringProperty(required=True)
     api_secret = db.StringProperty(required=True)
 
-    tweet_count = db.IntegerProperty(default=0)
-
     # Helps us figure out where to start requesting new tweets
     latest_tweet_id = db.IntegerProperty()
     import_finished = db.BooleanProperty(default=False)
 
     # We need to know this for some of the graphs we want to draw
     oldest_tweet_at = db.DateTimeProperty(required=True, auto_now_add=True)
+
+    # We need to denormalize count fields for each of the statistics we're
+    # interested in..
+    tweet_count = db.IntegerProperty(default=0)
+    place_count = db.IntegerProperty(default=0)
+    source_count = db.IntegerProperty(default=0)
+    mention_count = db.IntegerProperty(default=0)
+    tag_count = db.IntegerProperty(default=0)
 
     @property
     def tweets(self):
