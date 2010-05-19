@@ -1,7 +1,19 @@
 import hashlib
 import hmac
-
+from google.appengine.ext.webapp import WSGIApplication
 from settings import COOKIE_SECRET
+
+
+def reverse(view_name, *args):
+    """Easy URL-reversing, given a view handler name and the args it
+    needs. Inspired by _urlnode_render_replacement in
+    google/appengine/ext/webapp/template.py."""
+    app = WSGIApplication.active_instance
+    try:
+        handler = app.get_registered_handler_by_name(view_name)
+    except KeyError, e:
+        raise RuntimeError('Handler %s not found' % view_name)
+    return handler.get_url(*args)
 
 
 ##############################################################################

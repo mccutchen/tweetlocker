@@ -9,7 +9,7 @@ archive_types = '(%s)' % '|'.join(trove.views.GENERIC_ARCHIVE_MAP)
 archives_pattern = r'^/%s/$' % archive_types
 
 # The pattern for an individual archive page (e.g. /mentions/1234/)
-archive_pattern = r'^/%s/(\d+)/$' % archive_types
+archive_pattern = r'^/%s/(\w+)/$' % archive_types
 
 urls = [
     (r'^/$', trove.views.IndexHandler),

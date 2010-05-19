@@ -1,9 +1,9 @@
 <section id="{{ slug }}-archives" class="archives list">
-    <h3><a href="{{ reverse_url('archives', slug) }}">{{ slug }}</a></h3>
+    <h3><a href="{{ reverse_url('ArchivesHandler', slug) }}">{{ slug }}</a></h3>
     <table cellspacing="0">
         {% for archive in archives %}
             <tr>
-                <td><a href="{{ reverse_url('archive', slug, archive.id) }}">{{ archive }}</td>
+                <td><a href="{{ reverse_url('ArchiveHandler', slug, archive.id|default('XXX')) }}">{{ archive }}</td>
                 <td>{{ archive.tweet_count }}</td>
             </tr>
         {% endfor %}
