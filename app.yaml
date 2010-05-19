@@ -12,7 +12,7 @@ handlers:
   static_dir: static
 
 - url: /_ah/queue/deferred
-  script: $PYTHON_LIB/google/appengine/ext/deferred/handler.py
+  script: deferred.py
 
 - url: /.*
   script: main.py
