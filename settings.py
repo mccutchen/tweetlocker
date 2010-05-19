@@ -4,6 +4,7 @@ PROJECT_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 # See if we're running in production or in development
 PRODUCTION = 'Development' not in os.environ.get('SERVER_SOFTWARE', '')
+DEBUG = not PRODUCTION
 
 # Set the OAuth callback URL dynamically, based on the current host name. This
 # works in development or production.

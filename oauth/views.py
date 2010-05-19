@@ -4,7 +4,7 @@ from google.appengine.ext import db, deferred
 from google.appengine.api import memcache
 
 import tweepy
-from lib.handlers import RequestHandler
+from lib.webapp import RequestHandler
 
 from models import User
 from utils import make_auth
@@ -38,7 +38,7 @@ class CallbackHandler(RequestHandler):
         self.clear_cookie('request_token_key')
         self.clear_cookie('request_token_secret')
 
-        verifier = self.get_argument('oauth_verifier')
+        verifier = self.request.params.get('oauth_verifier')
         auth.set_request_token(token_key, token_secret)
 
         try:
