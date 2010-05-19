@@ -7,13 +7,25 @@
 {% block bodyid %}index{% endblock %}
 
 {% block content %}
-    <h2>Welcome {{ user.screen_name }} ({{ user.id }})</h2>
-    {% if user.import_finished %}
-        <p>We've finished importing your tweets.  You've got {{ user.tweet_count }} of them.</p>
-    {% else %}
-        <p>We have not yet finished importing your tweets.  Here's what we've got so far:</p>
-    {% endif %}
-    
+
+    <section id="welcome">
+        <p>Hi there, <strong>{{ user }}</strong>!  Here are some numbers for you:
+        You've made <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.tweet_count }}</a> tweets
+        {%- if user.tag_count %}
+            marked with <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.tag_count }} tags</a>
+        {% endif -%}
+        {%- if user.place_count %}
+            from <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.place_count }} places</a>
+        {% endif -%}
+        {%- if user.source_count %}
+            using <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.source_count }} sources</a>
+        {% endif -%}
+        {%- if user.mention_count %}
+            mentioning <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.mention_count }} other people</a>
+        {% endif -%}
+        .</p>
+    </section>
+
     <section id="latest-tweets" class="tweet list">
         <h3>Latest Tweets</h3>
         <ul>

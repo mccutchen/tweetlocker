@@ -18,6 +18,7 @@ from models import MentionArchive, Place, Source, TagArchive
 
 # Map archive types as they appear in URLs to model classes
 GENERIC_ARCHIVE_MAP = {
+    'tweets': None,
     'mentions': MentionArchive,
     'places': Place,
     'sources': Source,
@@ -51,6 +52,7 @@ class IndexHandler(RequestHandler):
 
         generic_archives = []
         for kind, model in GENERIC_ARCHIVE_MAP.items():
+            if model is None: continue
             archives = getattr(user, kind).fetch(settings.ARCHIVE_LIST_SIZE)
             generic_archives.append((model.__name__, kind, archives))
 
