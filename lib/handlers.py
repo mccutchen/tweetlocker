@@ -31,29 +31,12 @@ class RequestHandler(webapp.RequestHandler):
         return self._user
 
     def render(self, template, context=None, status=None, mimetype=None):
+        """Renders the given template (or list of templates to choose) with
+        the given context using Jinja2."""
         context = context or {}
         self.response.set_status(status or DEFAULT_STATUS)
         self.response.headers['Content-type'] = mimetype or DEFAULT_MIMETYPE
         self.response.out.write(render_to_string(template, context))
-
-    def render_string(self, template, **kwargs):
-        """Use Jinja2 to render the given template and context, after doing
-        the same context manipulation as the superclass's render_string
-        method.  Called internally by the render() method."""
-        # Default context copied from tornado.web.RequestHandler.render_string
-        args = dict(
-            handler=self,
-            request=self.request,
-            current_user=self.current_user,
-            locale=self.locale,
-            _=self.locale.translate,
-            static_url=self.static_url,
-            xsrf_form_html=self.xsrf_form_html,
-            reverse_url=self.application.reverse_url
-        )
-        args.update(self.ui)
-        args.update(kwargs)
-        return render_to_string(template, args)
 
     def set_secure_cookie(self, name, value, **kwargs):
         """Signs and timestamps a cookie so it cannot be forged.
