@@ -151,6 +151,11 @@ class Archive(db.Model):
     tweets = db.ListProperty(db.Key)
     tweet_count = db.IntegerProperty(default=0)
 
+    def add_tweet(self, tweet):
+        """Adds the given tweet to this archive's list of tweets, and update
+        its denormalized count field."""
+        self.tweets.append(tweet.key())
+        self.tweet_count = len(self.tweets)
 
 class MentionArchive(Archive):
     """A collection of a particular user's mentions of a particular other
