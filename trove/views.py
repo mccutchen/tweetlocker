@@ -36,7 +36,7 @@ class IndexHandler(RequestHandler):
             return self.render('welcome.html')
 
         # Gather up the info we need for the front page.
-        tweets = user.tweets.fetch(20)
+        tweets = user.tweets.fetch(settings.ARCHIVE_LIST_SIZE)
 
         # We have to do some special gymnastics to give the templates a usable
         # datastructure for date archives, a list of (year, [months]) tuples.

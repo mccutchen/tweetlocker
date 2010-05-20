@@ -1,11 +1,12 @@
 <div class="tweet">
     <p class="text">{{ tweet.text }}</p>
     <div class="meta">
-        <span class="date">{{ tweet.created_at }}</span>
+        <span class="date">{{ tweet.created_at|dateformat('%b %d %Y at %I:%M%p') }}</span>
         {% if tweet.has_coordinates %}
+            from
             <span class="place">
                 {% if tweet.place %}
-                    {{ tweet.place }}
+                    <a href="{{ reverse_url('ArchiveHandler', 'places', tweet.place.id) }}">{{ tweet.place }}</a>
                 {% else %}
                     {{ tweet.coordinates }}
                 {% endif %}

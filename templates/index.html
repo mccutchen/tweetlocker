@@ -22,21 +22,19 @@
         {% endif -%}
         {%- if user.mention_count %}
             and mentioning <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.mention_count }} people</a>
-        {% endif -%}
-        .</p>
+        {% endif -%}.
+        </p>
     </section>
 
-    <section id="latest-tweets" class="tweet list">
-        <h3>Latest Tweets</h3>
-        <ul>
-            {% for tweet in tweets %}
-                <li>{% include "_tweet.html" %}</li>
-            {% endfor %}
-        </ul>
+    <section id="latest-tweets" class="tweet list span-12 append-1">
+        <h2>Latest Tweets</h2>
+        {% for tweet in tweets %}
+            {% include "_tweet.html" %}
+        {% endfor %}
     </section>
 
-    <section id="date-archives" class="archives list">
-        <h3>Dates</h3>
+    <section id="date-archives" class="archives list span-5 append-1">
+        <h2>Dates</h2>
         <table cellspacing="0">
             {% for year, months in date_archives %}
                 <tbody class="year">
@@ -54,6 +52,7 @@
 
     {# Generic archives #}
     {% for kind, slug, archives in generic_archives %}
+        {% set last = loop.last %}
         {% include "_archives_list.html" %}
     {% endfor %}
 {% endblock %}
