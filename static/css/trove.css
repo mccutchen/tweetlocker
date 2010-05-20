@@ -1,3 +1,13 @@
+/*
+"twitter gray" scheme from http://kuler.adobe.com/#themeID/556399
+#d6f5ff - light blue
+#45707f - dark blue
+#8ae1ff - twitter blue
+#6b7a7f - gray
+#6eb4cc - medium blue
+*/
+
+
 body {
 	margin: 0;
 	padding: 0;
@@ -12,12 +22,18 @@ body {
   src: url(../fonts/LeagueGothic.otf) format("opentype");
 }
 
+a {
+    color: #45707f;
+    text-decoration: none;
+}
+
 
 /* Site header */
 header {
 	background-color: #333;
-	background: -webkit-gradient(linear, left top, left bottom, from(#444), to(#222));
+	background: -webkit-gradient(linear, left top, left bottom, from(#45707f), to(#345662));
 	color: #fff;
+	border-bottom: 1px solid #1B2D33;
 }
 header h1 {
 	font-family: League Gothic, Helvetica, Arial;
@@ -25,16 +41,19 @@ header h1 {
 	padding: .1em .2em;
 	font-size: 6em;
 	text-transform: uppercase;
-	text-shadow: 2px 2px 2px #111;
+	text-shadow: 2px 2px 2px #28434C;
 }
 header h1 a {
 	color: #fff;
 	text-decoration: none;
 }
+header h1 span {
+    color: #d6f5ff;
+}
 
 
 div#content {
-    margin: 1em;
+    font-size: 1.2em;
 }
 
 
@@ -77,9 +96,15 @@ section.archives.list {
     
 }
 
-td {
+section.archives.list td {
     padding: 5px 10px;
-    border-bottom: 1px dotted #ccc;
+}
+section.archives.list td:first-child {
+    padding-left: 0;
+}
+section.archives.list td:last-child {
+    text-align: right;
+    padding: 5px 0 5px 20px;
 }
 
 
@@ -90,13 +115,12 @@ body#index section {
 
 
 section#welcome {
-    margin: .5em 1em;
-    padding: .5em;
+    margin: 1px 0 1em 0;
+    padding: .5em 1em;
     font-size: 2em;
     display: block;
-    background-color: #eee;
-    border-radius: 8px;
-    box-shadow: 2px 2px 2px #ccc;
+    background-color: #ddd;
+    -webkit-box-shadow: 0px 2px 2px #ccc;
 }
 section#welcome p {
     margin: 0;
@@ -108,4 +132,11 @@ section#latest-tweets {
 }
 section#latest-tweets ul li:first-child div.tweet p.text {
     font-size: 2em;
+}
+
+section#date-archives tbody tr:first-child td {
+    border-top: 1px dotted #ccc;
+}
+section#date-archives tbody:first-child tr:first-child td {
+    border-top: none;
 }

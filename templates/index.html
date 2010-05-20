@@ -10,18 +10,18 @@
 
     <section id="welcome">
         <p>Hi there, <strong>{{ user }}</strong>!  Here are some numbers for you:
-        You've made <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.tweet_count }} tweets</a>
+        You've made <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.tweet_count }}&nbsp;tweets</a>
         {%- if user.tag_count %}
-            marked with <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.tag_count }} tags</a>
+            marked with <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.tag_count }}&nbsp;tags</a>
         {% endif -%}
         {%- if user.place_count %}
-            from <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.place_count }} places</a>
+            from <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.place_count }}&nbsp;places</a>
         {% endif -%}
         {%- if user.source_count %}
-            using <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.source_count }} sources</a>
+            using <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.source_count }}&nbsp;sources</a>
         {% endif -%}
         {%- if user.mention_count %}
-            mentioning <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.mention_count }} other people</a>
+            and mentioning <a href="{{ reverse_url('ArchivesHandler', 'tweets') }}">{{ user.mention_count }} people</a>
         {% endif -%}
         .</p>
     </section>
@@ -39,15 +39,15 @@
         <h3>Dates</h3>
         <table cellspacing="0">
             {% for year, months in date_archives %}
-                {% for month in months %}
-                    <tr>
-                        {% if months.index(month) == 0 %}
-                            <td rowspan="{{ months|length }}" valign="top">{{ year }}</td>
-                        {% endif %}
-                        <td>{{ month }}</td>
-                        <td>{{ month.tweets|length }}</td>
-                    </tr>
-                {% endfor %}
+                <tbody class="year">
+                    {% for month in months %}
+                        <tr>
+                            <td>{{ year }}</td>
+                            <td>{{ month }}</td>
+                            <td>{{ month.tweet_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
             {% endfor %}
         </table>
     </section>
