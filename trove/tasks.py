@@ -109,19 +109,32 @@ def post_process_tweet(tweet_id, user_id):
 
     logging.info('Post-processing tweet %s for user %s' % (tweet_id, user_id))
 
-    update_date_archives(tweet, user)
-    update_mention_archives(tweet, user)
-    update_tag_archives(tweet, user)
-    update_date_archives(tweet, user)
+    # Get the reference properties outside of the transaction
+    place = tweet.place
+    source = tweet.source
+    place_count = place.tweets.count() if place else None
+    source_count = source.tweets.count() if source else None
 
-    # Update denormalized counts on reference properties
-    if tweet.place:
-        tweet.place.tweet_count = tweet.place.tweets.count()
-        tweet.place.put()
+    def txn():
+        to_put = []
+        fns = (update_date_archives, update_mention_archives,
+               update_tag_archives)
+        for fn in fns:
+            to_put.extend(fn(tweet, user))
 
-    if tweet.source:
-        tweet.source.tweet_count = tweet.source.tweets.count()
-        tweet.source.put()
+        # Update denormalized counts on reference properties
+        if place:
+            place.tweet_count = place_count
+            to_put.append(place)
+        if source:
+            source.tweet_count = source_count
+            to_put.append(source)
+
+        # Commit our changes
+        return db.put(to_put)
+
+    # Make the updates in a transaction
+    db.run_in_transaction(txn)
 
 def update_mention_archives(tweet, user):
     """Scans the given tweet for mentions of other Twitter users (like
@@ -137,18 +150,17 @@ def update_mention_archives(tweet, user):
         except tweepy.TweepError, e:
             logging.error('Could not look up users: %s' % ','.join(mentions))
         else:
-            for mention in mentions:
-                make_mention_archive(user, mention, tweet)
+            return [make_mention_archive(user, m, tweet) for m in mentions]
+    return []
 
 def update_tag_archives(tweet, user):
     """Scans the given tweet for any hashtags (like #tagname) and adds them to
     the archive for the given user's use of that tag.  The archive will be
     created if it needs to be."""
     tags = re.findall(r'#(\w+)', tweet.text)
-    for tag in tags:
-        make_tag_archive(user, tag, tweet)
+    return [make_tag_archive(user, tag, tweet) for tag in tags]
 
 def update_date_archives(tweet, user):
     """Just calls the make_date_archives utility function to add the tweet to
     the appropriate date archives for the given user."""
-    make_date_archives(user, tweet)
+    return make_date_archives(user, tweet)

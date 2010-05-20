@@ -43,27 +43,24 @@ def make_place(user, placedata):
                   (placedata['id'], user.id))
     key = db.Key.from_path('User', str(user.id),
                            'Place', str(placedata['id']))
-    def txn(placedata=placedata):
-        place = Place.get(key)
-        if not place:
-            # Average the bounding box to get a single coordinate point for
-            # the place
-            bbox = placedata.pop('bounding_box')
-            coords = bbox['coordinates'][0]
-            num = float(len(coords))
-            lat = sum(lat for lon, lat in coords) / num
-            lon = sum(lon for lon, lat in coords) / num
+    place = Place.get(key)
+    if not place:
+        # Average the bounding box to get a single coordinate point for
+        # the place
+        bbox = placedata.pop('bounding_box')
+        coords = bbox['coordinates'][0]
+        num = float(len(coords))
+        lat = sum(lat for lon, lat in coords) / num
+        lon = sum(lon for lon, lat in coords) / num
 
-            # Make sure placedata keys are not unicode
-            placedata = dict((str(k), v) for k,v in placedata.iteritems())
+        # Make sure placedata keys are not unicode
+        placedata = dict((str(k), v) for k,v in placedata.iteritems())
 
-            # Create the place with the calculated coordinates
-            placedata['coordinates'] = db.GeoPt(lat, lon)
-            place = Place(key=key, **placedata)
-            place.put()
-        return place
-
-    return db.run_in_transaction(txn)
+        # Create the place with the calculated coordinates
+        placedata['coordinates'] = db.GeoPt(lat, lon)
+        place = Place(key=key, **placedata)
+        place.put()
+    return place
 
 def make_source(user, name, url=None):
     """Makes a Source object for the given user's account with the given name
@@ -72,56 +69,48 @@ def make_source(user, name, url=None):
                   (name, user.id))
     key = db.Key.from_path('User', str(user.id),
                            'Source', str(name))
-    def txn():
-        source = Source.get(key)
-        if not source:
-            source = Source(key=key, name=name)
-            if url:
-                try:
-                    source.url = url
-                except:
-                    logging.warn('Invalid source URL: %s' % url)
-            source.put()
-        return source
-    return db.run_in_transaction(txn)
+    source = Source.get(key)
+    if not source:
+        source = Source(key=key, name=name)
+        if url:
+            try:
+                source.url = url
+            except:
+                logging.warn('Invalid source URL: %s' % url)
+        source.put()
+    return source
 
 def make_mention_archive(user, mentioned_user, tweet):
     """Adds the given tweet to the given user's archive of mentions of the
-    given mentioned_user, creating the archive if necessary."""
+    given mentioned_user, creating the archive if necessary. Should be run in
+    a transaction."""
     logging.debug('Making mention archives for %s in tweet %s from user %s' %
                   (mentioned_user.id, tweet.id, user.id))
     key = db.Key.from_path('User', str(user.id),
                            'MentionArchive', str(mentioned_user.id))
-    def txn():
-        archive = MentionArchive.get(key)
-        if not archive:
-            archive = MentionArchive(
-                key=key, id=mentioned_user.id,
-                screen_name=mentioned_user.screen_name)
-        archive = archive_tweet(archive, tweet)
-        db.put(archive)
-        return archive
-    return db.run_in_transaction(txn)
+    archive = MentionArchive.get(key)
+    if not archive:
+        archive = MentionArchive(
+            key=key, id=mentioned_user.id,
+            screen_name=mentioned_user.screen_name)
+    archive.add_tweet(tweet)
+    return archive
 
 def make_tag_archive(user, tag, tweet):
     """Adds the given tweet to the given user's archive for the given tag,
-    creating the archive if necessary."""
+    creating the archive if necessary. Should be run in a transaction."""
     logging.debug('Making tag archives for tag %s in tweet %s from user %s' %
                   (tag, tweet.id, user.id))
     key = db.Key.from_path('User', str(user.id), 'TagArchive', tag)
-    def txn():
-        archive = TagArchive.get(key)
-        if not archive:
-            archive = TagArchive(key=key, tag=tag)
-        archive = archive_tweet(archive, tweet)
-        db.put(archive)
-        return archive
-    return db.run_in_transaction(txn)
-
+    archive = TagArchive.get(key)
+    if not archive:
+        archive = TagArchive(key=key, tag=tag)
+    archive.add_tweet(tweet)
+    return archive
 
 def make_date_archives(user, tweet):
     """Adds the given tweet to the appropriate date archives, based on the
-    tweet's date, for the given user."""
+    tweet's date, for the given user. Should be run in a transaction."""
     logging.debug('Making date archives for tweet %s from user %s' %
                   (tweet.id, user.id))
     created_at = tweet.created_at
@@ -130,43 +119,43 @@ def make_date_archives(user, tweet):
     # added.
     archives = []
 
-    # Year
-    key = created_at.strftime(YearArchive.KEY_NAME)
-    archives.append(
-        YearArchive.get_or_insert(key, parent=user, year=created_at.year))
+    # Make the keys ahead of time
+    year_key = YearArchive.make_key(user, created_at)
+    month_key = MonthArchive.make_key(user, created_at)
+    day_key = DayArchive.make_key(user, created_at)
+    week_key = WeekArchive.make_key(user, created_at)
 
-    # Month
-    key = created_at.strftime(MonthArchive.KEY_NAME)
-    archives.append(
-        MonthArchive.get_or_insert(
-            key, parent=user, year=created_at.year, month=created_at.month))
+    # Get them all at once
+    year, month, day, week = db.get([year_key, month_key, day_key, week_key])
 
-    # Day
-    key = created_at.strftime(DayArchive.KEY_NAME)
-    archives.append(
-        DayArchive.get_or_insert(
-            key, parent=user, year=created_at.year, month=created_at.month,
-            day=created_at.day, weekday=created_at.weekday()))
+    # Make each archive if it doesn't already exist, and add each to the list
+    # of archives.
+    if year is None:
+        year = YearArchive(key=year_key, year=created_at.year)
+    archives.append(year)
 
-    # Week
-    key = created_at.strftime(WeekArchive.KEY_NAME)
-    week = int(created_at.strftime('%U'))
-    archives.append(
-        WeekArchive.get_or_insert(
-            key, parent=user, year=created_at.year, week=week))
+    if month is None:
+        month = MonthArchive(
+            key=month_key, year=created_at.year, month=created_at.month)
+    archives.append(month)
 
-    # Add the tweet to all of the archives in one transaction
-    db.run_in_transaction(
-        lambda: db.put([archive_tweet(a, tweet) for a in archives]))
+    if day is None:
+        day = DayArchive(
+            key=day_key, year=created_at.year, month=created_at.month,
+            day=created_at.day, weekday=created_at.weekday())
+    archives.append(day)
+
+    if week is None:
+        week = WeekArchive(
+            key=week_key, year=created_at.year,
+            week=int(created_at.strftime('%U')))
+    archives.append(week)
+
+    # Add the tweet to each of the archives
+    for archive in archives:
+        archive.add_tweet(tweet)
+
     return archives
-
-def archive_tweet(archive, tweet):
-    """Utility function to add a tweet to an archive.  Adds the Tweet's key to
-    the archive's tweets list and updates the archive's denormalized
-    tweet_count."""
-    archive.tweets.append(tweet.key())
-    archive.tweet_count = len(archive.tweets)
-    return archive
 
 def increment_counter(key, field='tweet_count', amount=1, commit=True):
     """A utility function, designed to be used in a transaction, that will

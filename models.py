@@ -183,6 +183,13 @@ class DateArchive(Archive):
     # based on an arbitrary datetime object.
     KEY_NAME = None
 
+    @classmethod
+    def make_key(cls, user, date):
+        """Makes the key for the date archive for the given date belonging to
+        the given user."""
+        return db.Key.from_path(
+            cls.kind(), date.strftime(cls.KEY_NAME), parent=user.key())
+
 class YearArchive(DateArchive):
     KEY_NAME = '%Y'
     year = db.IntegerProperty(required=True)
