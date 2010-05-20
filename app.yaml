@@ -14,5 +14,9 @@ handlers:
 - url: /_ah/queue/deferred
   script: deferred.py
 
+- url: /_/shell
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
 - url: /.*
   script: main.py
