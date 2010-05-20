@@ -38,8 +38,8 @@ def fetch_new_tweets(user_id, token_key, token_secret, since_id=None):
 
 
 def initial_import(user_id, max_id=None):
-    logging.info('Importing all tweets older than %s for user %d...' %
-                 (max_id, user_id))
+    logging.critical('Importing all tweets older than %s for user %d...' %
+                     (max_id, user_id))
 
     # We should just quit if the user doesn't exist or if their initial import
     # has already finished.
@@ -106,6 +106,9 @@ def post_process_tweet(tweet_id, user_id):
     if tweet is None or user is None:
         return logging.error('Could not post-process tweet %s for user %s' %
                              (tweet_id, user_id))
+
+    logging.critical(
+        'Post-processing tweet %s for user %s' % (tweet_id, user_id))
 
     update_date_archives(tweet, user)
     update_mention_archives(tweet, user)

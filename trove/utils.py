@@ -92,11 +92,10 @@ def make_mention_archive(user, mentioned_user, tweet):
             archive = MentionArchive(
                 key=key, id=mentioned_user.id,
                 screen_name=mentioned_user.screen_name)
-            archive.put()
+        archive = archive_tweet(archive, tweet)
+        db.put(archive)
         return archive
-
-    archive = db.run_in_transaction(txn)
-    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+    return db.run_in_transaction(txn)
 
 def make_tag_archive(user, tag, tweet):
     """Adds the given tweet to the given user's archive for the given tag,
@@ -106,51 +105,58 @@ def make_tag_archive(user, tag, tweet):
         archive = TagArchive.get(key)
         if not archive:
             archive = TagArchive(key=key, tag=tag)
-            archive.put()
+        archive = archive_tweet(archive, tweet)
+        db.put(archive)
         return archive
-    archive = db.run_in_transaction(txn)
-    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+    return db.run_in_transaction(txn)
+
 
 def make_date_archives(user, tweet):
     """Adds the given tweet to the appropriate date archives, based on the
     tweet's date, for the given user."""
     created_at = tweet.created_at
 
+    # We'll build a list of archives to which the given tweet needs to be
+    # added.
+    archives = []
+
     # Year
     key = created_at.strftime(YearArchive.KEY_NAME)
-    archive = YearArchive.get_or_insert(
-        key, parent=user, year=created_at.year)
-    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+    archives.append(
+        YearArchive.get_or_insert(key, parent=user, year=created_at.year))
 
     # Month
     key = created_at.strftime(MonthArchive.KEY_NAME)
-    archive = MonthArchive.get_or_insert(
-        key, parent=user, year=created_at.year, month=created_at.month)
-    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+    archives.append(
+        MonthArchive.get_or_insert(
+            key, parent=user, year=created_at.year, month=created_at.month))
 
     # Day
     key = created_at.strftime(DayArchive.KEY_NAME)
-    archive = DayArchive.get_or_insert(
-        key, parent=user, year=created_at.year, month=created_at.month,
-        day=created_at.day, weekday=created_at.weekday())
-    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+    archives.append(
+        DayArchive.get_or_insert(
+            key, parent=user, year=created_at.year, month=created_at.month,
+            day=created_at.day, weekday=created_at.weekday()))
 
     # Week
     key = created_at.strftime(WeekArchive.KEY_NAME)
     week = int(created_at.strftime('%U'))
-    archive = WeekArchive.get_or_insert(
-        key, parent=user, year=created_at.year, week=week)
-    db.run_in_transaction(archive_tweet, archive.key(), tweet.key())
+    archives.append(
+        WeekArchive.get_or_insert(
+            key, parent=user, year=created_at.year, week=week))
 
+    # Add the tweet to all of the archives in one transaction
+    db.run_in_transaction(
+        lambda: db.put([archive_tweet(a, tweet) for a in archives]))
+    return archives
 
-def archive_tweet(archive_key, tweet_key):
+def archive_tweet(archive, tweet):
     """Utility function to add a tweet to an archive.  Adds the Tweet's key to
     the archive's tweets list and updates the archive's denormalized
     tweet_count."""
-    archive = db.get(archive_key)
-    archive.tweets.append(tweet_key)
+    archive.tweets.append(tweet.key())
     archive.tweet_count = len(archive.tweets)
-    archive.put()
+    return archive
 
 def increment_counter(key, field='tweet_count', amount=1, commit=True):
     """A utility function, designed to be used in a transaction, that will
