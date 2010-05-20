@@ -7,7 +7,7 @@ def make_tweet(user, tweetobj):
     """Creates a Tweet entity for the given tweepy API tweet object.  The new
     Tweet is never put to the datastore and any post-processing tasks are NOT
     fired off."""
-    #logging.info('Making Tweet %s' % tweetobj.id)
+    logging.debug('Making tweet %s for user %s' % (tweetobj.id, user.id))
 
     # Copy fields that are a 1-to-1 match
     exclude = set(('coordinates', 'place', 'source', 'source_url'))
@@ -39,6 +39,8 @@ def make_place(user, placedata):
     """Makes a Place object for the given user's account with the given place
     data.  The data given will have coordinates for its bounding box, which
     will be averaged into a single coordinate for the place."""
+    logging.debug('Making place archives for %s from user %s' %
+                  (placedata['id'], user.id))
     key = db.Key.from_path('User', str(user.id),
                            'Place', str(placedata['id']))
     def txn(placedata=placedata):
@@ -66,6 +68,8 @@ def make_place(user, placedata):
 def make_source(user, name, url=None):
     """Makes a Source object for the given user's account with the given name
     and optional URL."""
+    logging.debug('Making source archives for %s from user %s' %
+                  (name, user.id))
     key = db.Key.from_path('User', str(user.id),
                            'Source', str(name))
     def txn():
@@ -84,6 +88,8 @@ def make_source(user, name, url=None):
 def make_mention_archive(user, mentioned_user, tweet):
     """Adds the given tweet to the given user's archive of mentions of the
     given mentioned_user, creating the archive if necessary."""
+    logging.debug('Making mention archives for %s in tweet %s from user %s' %
+                  (mentioned_user.id, tweet.id, user.id))
     key = db.Key.from_path('User', str(user.id),
                            'MentionArchive', str(mentioned_user.id))
     def txn():
@@ -100,6 +106,8 @@ def make_mention_archive(user, mentioned_user, tweet):
 def make_tag_archive(user, tag, tweet):
     """Adds the given tweet to the given user's archive for the given tag,
     creating the archive if necessary."""
+    logging.debug('Making tag archives for tag %s in tweet %s from user %s' %
+                  (tag, tweet.id, user.id))
     key = db.Key.from_path('User', str(user.id), 'TagArchive', tag)
     def txn():
         archive = TagArchive.get(key)
@@ -114,6 +122,8 @@ def make_tag_archive(user, tag, tweet):
 def make_date_archives(user, tweet):
     """Adds the given tweet to the appropriate date archives, based on the
     tweet's date, for the given user."""
+    logging.debug('Making date archives for tweet %s from user %s' %
+                  (tweet.id, user.id))
     created_at = tweet.created_at
 
     # We'll build a list of archives to which the given tweet needs to be

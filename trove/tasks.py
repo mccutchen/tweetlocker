@@ -79,7 +79,7 @@ def initial_import(user_id, max_id=None):
 
     # Otherwise, the import has finished.  Update the user accordingly.
     else:
-        logging.info('Initial import finished!')
+        logging.critical('Initial import finished!')
 
         # Note the latest tweet, so we know where to start importing new ones.
         last_tweet = user.tweets.get()
@@ -107,8 +107,7 @@ def post_process_tweet(tweet_id, user_id):
         return logging.error('Could not post-process tweet %s for user %s' %
                              (tweet_id, user_id))
 
-    logging.critical(
-        'Post-processing tweet %s for user %s' % (tweet_id, user_id))
+    logging.info('Post-processing tweet %s for user %s' % (tweet_id, user_id))
 
     update_date_archives(tweet, user)
     update_mention_archives(tweet, user)
