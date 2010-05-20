@@ -27,6 +27,11 @@ a {
     text-decoration: none;
 }
 
+/* HTML5 elements */
+header, section {
+    display: block;
+}
+
 
 /* Site header */
 header {
