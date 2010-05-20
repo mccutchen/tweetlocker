@@ -1,3 +1,4 @@
+import datetime
 import jinja2
 
 from webapp.utils import reverse
@@ -10,6 +11,15 @@ environment = jinja2.Environment(
 def render_to_string(filename, context={}):
     template = environment.get_or_select_template(filename)
     return template.render(context)
+
+
+##############################################################################
+# Filters, available to all templates
+##############################################################################
+def dateformat(d, format):
+    return getattr(d, 'strftime', lambda x: x)(format)
+
+environment.filters['dateformat'] = dateformat
 
 
 ##############################################################################
