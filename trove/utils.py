@@ -33,7 +33,7 @@ def make_tweet(user, tweetobj):
         tweet.place = make_place(user, tweetobj.place)
         tweet.has_coordinates = True
 
-    return tweet
+    return filter(None, (tweet, tweet.place, tweet.source))
 
 def make_place(user, placedata):
     """Makes a Place object for the given user's account with the given place
@@ -59,7 +59,8 @@ def make_place(user, placedata):
         # Create the place with the calculated coordinates
         placedata['coordinates'] = db.GeoPt(lat, lon)
         place = Place(key=key, **placedata)
-        place.put()
+
+    place.tweet_count += 1
     return place
 
 def make_source(user, name, url=None):
@@ -77,7 +78,8 @@ def make_source(user, name, url=None):
                 source.url = url
             except:
                 logging.warn('Invalid source URL: %s' % url)
-        source.put()
+
+    source.tweet_count += 1
     return source
 
 def make_mention_archive(user, mentioned_user, tweet):

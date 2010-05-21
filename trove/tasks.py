@@ -58,7 +58,7 @@ def initial_import(user_id, max_id=None):
         logging.info('Importing %d tweets in this batch' % len(tweets))
         entities, max_id = [], None
         for tweet in tweets:
-            entities.append(make_tweet(user, tweet))
+            entities.extend(make_tweet(user, tweet))
             max_id = tweet.id
         user.tweet_count += len(tweets)
         db.put(entities + [user])
@@ -95,6 +95,7 @@ def initial_import(user_id, max_id=None):
         for field in ('tweet', 'place', 'source', 'mention', 'tag'):
             count = getattr(user, field + 's').count()
             setattr(user, field + '_count', count)
+
         user.import_finished = True
         user.put()
 
@@ -105,16 +106,11 @@ def post_process_tweet(tweet_id, user_id):
     tweet_key = db.Key.from_path('User', str(user_id), 'Tweet', str(tweet_id))
     user, tweet = db.get([user_key, tweet_key])
     if tweet is None or user is None:
-        return logging.error('Could not post-process tweet %s for user %s' %
-                             (tweet_id, user_id))
+        return logging.error(
+            'Could not post-process tweet %s (%s) for user %s (%s)' %
+            (tweet_id, tweet, user_id, user))
 
-    logging.info('Post-processing tweet %s for user %s' % (tweet_id, user_id))
-
-    # Get the reference properties outside of the transaction
-    place = tweet.place
-    source = tweet.source
-    place_count = place.tweets.count() if place else None
-    source_count = source.tweets.count() if source else None
+    logging.debug('Post-processing tweet %s for user %s' % (tweet_id, user_id))
 
     def txn():
         to_put = []
@@ -122,20 +118,10 @@ def post_process_tweet(tweet_id, user_id):
                update_tag_archives)
         for fn in fns:
             to_put.extend(fn(tweet, user))
-
-        # Update denormalized counts on reference properties
-        if place:
-            place.tweet_count = place_count
-            to_put.append(place)
-        if source:
-            source.tweet_count = source_count
-            to_put.append(source)
-
-        # Commit our changes
         return db.put(to_put)
 
     # Make the updates in a transaction
-    db.run_in_transaction(txn)
+    db.run_in_transaction_custom_retries(5, txn)
 
 def update_mention_archives(tweet, user):
     """Scans the given tweet for mentions of other Twitter users (like

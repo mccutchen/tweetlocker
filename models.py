@@ -157,6 +157,7 @@ class Archive(db.Model):
         self.tweets.append(tweet.key())
         self.tweet_count = len(self.tweets)
 
+
 class MentionArchive(Archive):
     """A collection of a particular user's mentions of a particular other
     user. Should be created with a User as its parent."""
