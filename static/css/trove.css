@@ -116,16 +116,18 @@ body#index section.archives.list table {
 
 section#welcome {
     margin: 1em 0 2em 0;
-}
-section#welcome p {
     font-size: 2em;
     padding: .25em .5em;
-    margin: 0;
     background-color: #ddd;
     -webkit-box-shadow: 0px 2px 2px #ccc;
     border-radius: 8px;
     -webkit-border-radius: 8px;
 }
+section#welcome p {
+    margin: .5em 0;
+}
+section#welcome p:first-child { margin-top: 0; }
+section#welcome p:last-child { margin-bottom: 0; }
 
 section#latest-tweets {
 }

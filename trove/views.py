@@ -35,6 +35,11 @@ class IndexHandler(RequestHandler):
         if not user:
             return self.render('welcome.html')
 
+        # If we haven't finished importing the user's tweets, throw them to a
+        # temporary landing page.
+        if not user.import_finished:
+            return self.render('patience.html', { 'user': user })
+
         # Gather up the info we need for the front page.
         tweets = user.tweets.fetch(settings.ARCHIVE_LIST_SIZE)
 
