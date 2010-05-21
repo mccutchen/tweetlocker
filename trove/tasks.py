@@ -66,7 +66,8 @@ def initial_import(user_id, max_id=None):
         # Spawn deferred tasks to process each tweet we just created
         # (necessary because of the commit=False param given to make_tweet)
         for tweet in tweets:
-            deferred.defer(post_process_tweet, tweet.id, user.id)
+            deferred.defer(post_process_tweet, tweet.id, user.id,
+                           _queue='postprocess')
 
         # Spawn another instance of this task to continue the import
         # process. The max_id needs to be decremented here because Twitter's
@@ -75,7 +76,7 @@ def initial_import(user_id, max_id=None):
         # documentation says.
         max_id -= 1
         deferred.defer(
-            initial_import, user_id, max_id)
+            initial_import, user_id, max_id, _queue='import')
 
     # Otherwise, the import has finished.  Update the user accordingly.
     else:

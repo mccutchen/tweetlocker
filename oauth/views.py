@@ -64,7 +64,7 @@ class CallbackHandler(RequestHandler):
                         api_secret=access_token.secret)
             user.put()
             # Start the initial import for this user
-            deferred.defer(initial_import, user.id)
+            deferred.defer(initial_import, user.id, _queue='import')
 
         # Store the user's ID, so we can look them up in the datastore when
         # they return.

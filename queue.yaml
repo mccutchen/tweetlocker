@@ -1,0 +1,9 @@
+queue:
+- name: default
+  rate: 5/s
+- name: import
+  rate: 10/s
+  bucket_size: 10
+- name: postprocess
+  rate: 20/s
+  bucket_size: 20
