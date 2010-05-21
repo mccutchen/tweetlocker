@@ -4,9 +4,6 @@
 [submodule "ext/tweepy"]
 	path = ext/tweepy
 	url = git@github.com:mccutchen/tweepy.git
-[submodule "ext/tornado"]
-	path = ext/tornado
-	url = git@github.com:mccutchen/tornado.git
 [submodule "ext/appengine-search"]
 	path = ext/appengine-search
 	url = git@github.com:mccutchen/appengine-search.git
