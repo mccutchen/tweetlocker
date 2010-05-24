@@ -2,13 +2,8 @@
 monkeypatches, etc.)  in here."""
 
 import os, sys
-import settings
 
 # Add our external dependencies to sys.path
 extlibs = ('jinja2', 'tweepy', 'python-simplejson', 'appengine-search')
 for lib in extlibs:
     sys.path.insert(0, os.path.join('ext', lib))
-
-# Do some monkeypatching if we're not in production
-if not settings.PRODUCTION:
-    import devmode
