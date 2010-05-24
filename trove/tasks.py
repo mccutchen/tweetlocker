@@ -63,12 +63,6 @@ def initial_import(user_id, max_id=None):
         user.tweet_count += len(tweets)
         db.put(entities + [user])
 
-        # Spawn deferred tasks to process each tweet we just created
-        # (necessary because of the commit=False param given to make_tweet)
-        for tweet in tweets:
-            deferred.defer(post_process_tweet, tweet.id, user.id,
-                           _queue='postprocess')
-
         # Spawn another instance of this task to continue the import
         # process. The max_id needs to be decremented here because Twitter's
         # API will include the tweet with that ID, even though you might
@@ -91,13 +85,29 @@ def initial_import(user_id, max_id=None):
         old_tweet = db.get(old_key)
         user.oldest_tweet_at = old_tweet.created_at
 
-        # Update denormalized count fields
-        for field in ('tweet', 'place', 'source', 'mention', 'tag'):
-            count = getattr(user, field + 's').count()
-            setattr(user, field + '_count', count)
-
-        user.import_finished = True
         user.put()
+
+        # Now start the post-processing
+        deferred.defer(post_process_tweets, user.id, initial_import=True,
+                       _queue='postprocess')
+
+def post_process_tweets(user_id, initial_import=False):
+    """A deferred task to be called after a batch of tweets are imported.
+    Spawns deferred tasks to post-process each unprocessed tweet belonging to
+    the user.  If initial_import is True, also spawns a task to monitor the
+    user's account to flip its import_finished flag to True once all of its
+    tweets have been processed."""
+    # Spawn deferred tasks to process each tweet we just created
+    # (necessary because of the commit=False param given to make_tweet)
+    user = User.get_by_key_name(str(user_id))
+    if not user:
+        logging.error('Could not post-process tweets for user %s' % user_id)
+        return
+    for tweet in user.get_unprocessed_tweets():
+        deferred.defer(post_process_tweet, tweet.id, user.id,
+                       _queue='postprocess')
+    if initial_import:
+        deferred.defer(monitor_post_processing, user.id, _queue='monitor')
 
 def post_process_tweet(tweet_id, user_id):
     """A deferred task that should be called after a Tweet is created."""
@@ -113,7 +123,8 @@ def post_process_tweet(tweet_id, user_id):
     logging.debug('Post-processing tweet %s for user %s' % (tweet_id, user_id))
 
     def txn():
-        to_put = []
+        tweet.processed = True
+        to_put = [tweet]
         fns = (update_date_archives, update_mention_archives,
                update_tag_archives)
         for fn in fns:
@@ -121,7 +132,7 @@ def post_process_tweet(tweet_id, user_id):
         return db.put(to_put)
 
     # Make the updates in a transaction
-    db.run_in_transaction_custom_retries(5, txn)
+    db.run_in_transaction(txn)
 
 def update_mention_archives(tweet, user):
     """Scans the given tweet for mentions of other Twitter users (like
@@ -129,7 +140,10 @@ def update_mention_archives(tweet, user):
     the other user.  The archive will be created if it needs to be.
 
     Attempts to look the users up via the Twitter API's lookup method, so we
-    can have authoritative user IDs to go on."""
+    can have authoritative user IDs to go on.
+
+    FIXME: This hits the Twitter API for each transaction retry. Cache the
+    user objects between calls."""
     mentions = re.findall(r'@(\w+)', tweet.text)
     if mentions:
         try:
@@ -151,3 +165,22 @@ def update_date_archives(tweet, user):
     """Just calls the make_date_archives utility function to add the tweet to
     the appropriate date archives for the given user."""
     return make_date_archives(user, tweet)
+
+def monitor_post_processing(user_id):
+    """Monitors the user's unprocessed tweets after their initial import.
+    Once the user no longer has any unprocessed tweets, marks the initial
+    import as finished."""
+    user = User.get_by_key_name(str(user_id))
+    if not user:
+        return logging.error('monitor: User not found: %s' % user_id)
+    if user.unprocessed_tweets.count() == 0:
+        logging.critical(
+            'Initial post-processing for user %s finished!' % user_id)
+        # Update denormalized counts
+        user.import_finished = True
+        for prop in ('tweet', 'place', 'source', 'mention', 'tag'):
+            count = getattr(user, prop + 's').count()
+            setattr(user, prop + '_count', count)
+        user.put()
+    else:
+        deferred.defer(monitor_post_processing, user_id, _queue='monitor')

@@ -7,3 +7,5 @@ queue:
 - name: postprocess
   rate: 20/s
   bucket_size: 20
+- name: monitor
+  rate: 1/s

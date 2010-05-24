@@ -38,6 +38,10 @@ class User(db.Model):
         return db.Query(Tweet).ancestor(self).order('-created_at')
 
     @property
+    def unprocessed_tweets(self):
+        return db.Query(Tweet).ancestor(self).filter('processed =', False)
+
+    @property
     def places(self):
         return db.Query(Place).ancestor(self).order('-tweet_count')
 
@@ -77,6 +81,20 @@ class User(db.Model):
             return self._api
         self._api = make_api(self.api_key, self.api_secret)
         return self._api
+
+    def get_unprocessed_tweets(self):
+        """Fetches unprocessed tweets in batches and yields them
+        individually."""
+        batch_size = 100
+        def get_batch(cursor=None):
+            q = self.unprocessed_tweets
+            q.with_cursor(cursor)
+            return q.fetch(batch_size), q.cursor()
+        batch, cursor = get_batch()
+        while batch:
+            for tweet in batch:
+                yield tweet
+            batch, cursor = get_batch(cursor)
 
     def __unicode__(self):
         return u'@%s' % self.screen_name
@@ -138,6 +156,9 @@ class Tweet(Searchable, db.Model):
 
     has_source = db.BooleanProperty(default=False)
     source = db.ReferenceProperty(Source, collection_name='tweets')
+
+    # Has this Tweet been post-processed yet?
+    processed = db.BooleanProperty(default=False)
 
     @property
     def user(self):

@@ -14,6 +14,9 @@ def make_tweet(user, tweetobj):
     fields = set(Tweet.properties()) - exclude
     props = dict((field, getattr(tweetobj, field, None)) for field in fields)
 
+    # Add in the 'processed' field as False
+    props['processed'] = False
+
     # Create a Tweet entity with the properties copied from the tweepy object
     key = db.Key.from_path('User', str(user.id), 'Tweet', str(tweetobj.id))
     tweet = Tweet(key=key, **props)
