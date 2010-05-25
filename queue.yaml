@@ -2,10 +2,10 @@ queue:
 - name: default
   rate: 5/s
 - name: import
-  rate: 10/s
+  rate: 1/s
   bucket_size: 10
 - name: postprocess
-  rate: 20/s
+  rate: 2/s
   bucket_size: 20
 - name: monitor
-  rate: 1/s
+  rate: 1/m
