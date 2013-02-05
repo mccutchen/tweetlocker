@@ -1,14 +1,9 @@
 (ns tweetlocker.core
   (:require [fs.core :as fs]
-            [cheshire.core :as json]
-            [oauth.twitter :as twitter]))
+            [cheshire.core :as json]))
 
-(def ^:dynamic *consumer-key* (System/getenv "CONSUMER_KEY"))
-(def ^:dynamic *consumer-secret* (System/getenv "CONSUMER_SECRET"))
 (def ^:dynamic *data-root* (System/getenv "DATA_ROOT"))
-
 (def ^:dynamic *kinds* #{:tweet :reply :retweet :favorite :dm})
-
 
 (defn get-user-path
   "Get a path for some bit of user data rooted under data-root."
@@ -68,11 +63,3 @@
   [user-id]
   (fs/file? (get-access-token-path user-id)))
 
-(defn make-oauth-client
-  "Create a Twitter OAuth client for a user."
-  [user-id]
-  (let [access-token (read-access-token user-id)]
-    (twitter/oauth-client *consumer-key*
-                          *consumer-secret*
-                          (:token access-token)
-                          (:secret access-token))))
